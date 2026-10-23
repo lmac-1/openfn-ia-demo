@@ -1,20 +1,20 @@
 import Pagination from "../Pagination";
 import { EmptyState, Table, Td, Th, Tr } from "../Table";
-import type { Channel, ChannelRequest } from "../../types/channels";
+import type { ChannelLogRow } from "../../types/channels";
+import type { PageInfo } from "../../types/lists";
 import DateTime from "../DateTime";
 import TextLink from "../TextLink";
 import { ChannelStatePill } from "./StatePill";
 import { shortUuid } from "../../utils/format";
 
-/** History's Channel Logs table (run_live/channel_logs_component.ex). */
+/** History's Channel Logs table (run_live/channel_logs_component.ex): one page of requests, newest first. */
 export default function ChannelRequestsTable({
-  requests,
-  channels,
+  rows,
+  page,
   projectId,
 }: {
-  requests: ChannelRequest[];
-  /** The project's channels, for each request's Channel Name. */
-  channels: Channel[];
+  rows: ChannelLogRow[];
+  page: PageInfo;
   projectId: string;
 }) {
   return (
@@ -30,42 +30,35 @@ export default function ChannelRequestsTable({
           <Th>Error Message</Th>
         </Tr>
       }
-      footer={<Pagination pageNumber={1} pageSize={10} totalEntries={requests.length} />}
+      footer={<Pagination page={page} />}
     >
-      {requests.length === 0 ? (
+      {rows.length === 0 ? (
         <Tr>
           <Td colSpan={6}>
             <EmptyState icon="hero-inbox" message="No channel requests found." />
           </Td>
         </Tr>
       ) : (
-        requests.map((r) => {
-          const channel = channels.find((c) => c.id === r.channelId);
-          const path = r.events.find((e) => e.type === "destination_response")?.requestPath;
-          const error = r.events.find((e) => e.type === "error")?.errorMessage;
-          return (
-            <Tr key={r.id} id={`request-${r.id}`}>
-              <Td title={r.requestId}>
-                <TextLink to={`/projects/${projectId}/history/channels/${r.id}`} className="font-mono">
-                  {shortUuid(r.requestId)}
-                </TextLink>
-              </Td>
-              <Td className="text-gray-700">{path || "—"}</Td>
-              <Td>
-                <TextLink to={`/projects/${projectId}/history/channels?filters[channel_id]=${r.channelId}`}>
-                  {channel?.name}
-                </TextLink>
-              </Td>
-              <Td>
-                <DateTime value={r.startedAt} />
-              </Td>
-              <Td>
-                <ChannelStatePill state={r.state} />
-              </Td>
-              <Td className="max-w-xs truncate">{error}</Td>
-            </Tr>
-          );
-        })
+        rows.map((r) => (
+          <Tr key={r.id} id={`request-${r.id}`}>
+            <Td title={r.requestId}>
+              <TextLink to={`/projects/${projectId}/history/channels/${r.id}`} className="font-mono">
+                {shortUuid(r.requestId)}
+              </TextLink>
+            </Td>
+            <Td className="text-gray-700">{r.requestPath || "—"}</Td>
+            <Td>
+              <TextLink to={`/projects/${projectId}/history/channels?filters[channel_id]=${r.channelId}`}>{r.channelName}</TextLink>
+            </Td>
+            <Td>
+              <DateTime value={r.startedAt} />
+            </Td>
+            <Td>
+              <ChannelStatePill state={r.state} />
+            </Td>
+            <Td className="max-w-xs truncate">{r.errorMessage}</Td>
+          </Tr>
+        ))
       )}
     </Table>
   );

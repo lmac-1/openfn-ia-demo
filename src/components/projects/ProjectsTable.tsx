@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "../../routing/router";
 import type { ProjectOverview } from "../../types/workflows";
 import { EmptyState, Table, Td, Th, Tr } from "../Table";
 import TableTitle from "../TableTitle";
@@ -31,7 +31,7 @@ export default function ProjectsTable({
   /** Empty-state click. */
   onCreate?: () => void;
 }) {
-  const navigate = useNavigate();
+  const { navigate } = useRouter();
   const { rows, thProps } = useTableSort({ rows: projects, sortMap, initialKey: "name" });
 
   if (projects.length === 0) {

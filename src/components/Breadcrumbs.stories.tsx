@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { Breadcrumb, Breadcrumbs } from "./Breadcrumbs";
 import ProjectBreadcrumbs from "./shell/ProjectBreadcrumbs";
+import { projectLabel } from "./shell/projectPickerItems";
 import { projects } from "../mock-data/projects";
 import { withRouter } from "../stories/decorators";
 
@@ -20,13 +21,14 @@ export const Plain: Story = {
 export const Project: Story = {
   render: () => (
     <ProjectBreadcrumbs
-      project={projects[0]}
-      items={[["History", `/projects/${projects[0].id}/history`]]}
+      project={projects[0]!}
+      label={projectLabel(projects[0]!, projects)}
+      items={[["History", `/projects/${projects[0]!.id}/history`]]}
       current="Run 962b650f"
     />
   ),
 };
 
 export const Sandbox: Story = {
-  render: () => <ProjectBreadcrumbs project={projects[2]} current="Workflows" />,
+  render: () => <ProjectBreadcrumbs project={projects[2]!} label={projectLabel(projects[2]!, projects)} current="Workflows" />,
 };

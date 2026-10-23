@@ -26,9 +26,10 @@ function gherkin(text: string) {
         return `<span class="block text-gray-400 break-all" ${pad}>${escape(trimmed)}</span>`;
       const match = trimmed.match(GHERKIN_KEYWORD);
       if (match) {
-        const rest = trimmed.slice(match[2].length);
-        const heading = /:$/.test(match[2]);
-        return `<span class="block ${heading ? "text-gray-900" : "text-gray-800"}" ${pad}><strong class="${heading ? "text-gray-900" : "text-primary-700"}">${match[2]}</strong>${escape(rest)}</span>`;
+        const keyword = match[2]!;
+        const rest = trimmed.slice(keyword.length);
+        const heading = /:$/.test(keyword);
+        return `<span class="block ${heading ? "text-gray-900" : "text-gray-800"}" ${pad}><strong class="${heading ? "text-gray-900" : "text-primary-700"}">${keyword}</strong>${escape(rest)}</span>`;
       }
       return `<span class="block text-gray-700" ${pad}>${escape(trimmed)}</span>`;
     })

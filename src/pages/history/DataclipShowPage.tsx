@@ -1,47 +1,45 @@
-import { Navigate, useParams } from "react-router-dom";
 import Header from "../../components/Header";
 import { Centered, PageContent } from "../../components/PageContent";
 import ProjectBreadcrumbs from "../../components/shell/ProjectBreadcrumbs";
 import DataclipDetailsCard, { DataclipBodyCard } from "../../components/history/DataclipDetailsCard";
 import JsonViewer from "../../components/history/JsonViewer";
-import { findDataclip } from "../../mock-data/history";
-import { dataclipUpdatedAt } from "../../mock-data/history-extra";
-import { shortId } from "../../utils/format";
-import { findProject } from "../../mock-data/projects";
+import type { DataclipDetail } from "../../types/history";
+import type { CurrentProject } from "../../types/projects";
+import { shortUuid } from "../../utils/format";
+
+export interface DataclipShowPageProps {
+  project: CurrentProject;
+  projectLabel: string;
+  dataclip: DataclipDetail;
+  /** The body, pretty-printed; undefined while the host fetches it. Never shown for a wiped dataclip. */
+  body: string | undefined;
+}
 
 /** Inventory view `dataclip-show` (DataclipLive.Show, dataclip_live/show.ex). */
-export default function DataclipShowPage() {
-  const { projectId = "", dataclipId = "" } = useParams();
-  const project = findProject(projectId);
-  const dataclip = findDataclip(dataclipId);
-
-  // Lightning flashes "Dataclip not found" and sends you to History.
-  if (!dataclip || dataclip.projectId !== projectId) return <Navigate to={`/projects/${projectId}/history`} replace />;
-
+export default function DataclipShowPage({ project, projectLabel, dataclip, body }: DataclipShowPageProps) {
   return (
     <PageContent
       header={
         <Header
           breadcrumbs={
-            project && (
-              <ProjectBreadcrumbs
-                project={project}
-                current={
-                  <>
-                    Dataclip
-                    <span className="pl-2 font-light">{shortId(dataclip.id)}</span>
-                  </>
-                }
-              />
-            )
+            <ProjectBreadcrumbs
+              project={project}
+              label={projectLabel}
+              current={
+                <>
+                  Dataclip
+                  <span className="pl-2 font-light">{shortUuid(dataclip.id)}</span>
+                </>
+              }
+            />
           }
         />
       }
     >
       <Centered>
-        <DataclipDetailsCard dataclip={dataclip} updatedAt={dataclipUpdatedAt(dataclip.id)} />
-        <DataclipBodyCard dataclip={dataclip}>
-          <JsonViewer value={dataclip.body} />
+        <DataclipDetailsCard dataclip={dataclip} />
+        <DataclipBodyCard wiped={dataclip.wipedAt !== null}>
+          <JsonViewer value={body ?? ""} />
         </DataclipBodyCard>
       </Centered>
     </PageContent>

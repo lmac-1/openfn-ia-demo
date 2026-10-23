@@ -29,7 +29,7 @@ export default function ColorPalette({
       >
         {palette.map((hex) => (
           <label key={hex} className="relative cursor-pointer transition-transform hover:z-10 hover:scale-102">
-            {/* A swatch is the control here, so the radio itself is visually hidden. */}
+            {/* eslint-disable-next-line no-restricted-syntax -- a swatch is the control here, so the radio itself is visually hidden */}
             <input
               type="radio"
               name="color"

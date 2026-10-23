@@ -39,6 +39,7 @@ export default function InspectorLayout({
 }: Props) {
   return (
     <div className="pointer-events-auto w-screen max-w-md p-6" data-testid={testId} data-annotation={annotation}>
+      {/* eslint-disable-next-line no-restricted-syntax -- sized to the viewport */}
       <Card padding="none" className={cn("flex flex-col", fixedHeight ? "h-150" : "max-h-[calc(100vh-8rem)]")}>
         <div className="flex items-center justify-between gap-3 border-b border-gray-200 px-6 py-4">
           <div className="flex items-center gap-2">

@@ -42,7 +42,7 @@ export function findStep(id: string | undefined): Step | undefined {
 /** A run's final dataclip: its last step's output. */
 export function finalDataclipIdOf(run: Run): string | null {
   const s = stepsOf(run);
-  return s.length ? s[s.length - 1].outputDataclipId : null;
+  return s.length ? s[s.length - 1]!.outputDataclipId : null;
 }
 
 export function logsOf(run: Run): LogLine[] {

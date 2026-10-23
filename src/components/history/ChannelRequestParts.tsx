@@ -3,7 +3,7 @@ import { cn } from "../../utils/cn";
 import Card from "../Card";
 import { DetailItem, DetailList } from "../DetailList";
 import Pill, { type PillColor } from "../Pill";
-import { formatBytes } from "../../utils/format";
+import { formatBinaryBytes as formatBytes } from "../../utils/format";
 import CopyButton from "../CopyButton";
 import { EmptyState } from "../Table";
 
@@ -61,8 +61,9 @@ export function SectionSizeBadge({ size }: { size: number }) {
 export function HeadersTable({ headers }: { headers: [string, string][] }) {
   return (
     <DetailList className="text-xs">
-      {headers.map(([name, value]) => (
-        <DetailItem key={name} label={name} mono>
+      {headers.map(([name, value], i) => (
+        // Headers repeat (set-cookie, via), so the key is the position.
+        <DetailItem key={i} label={name} mono>
           <span className={cn("break-all", value === "[REDACTED]" && "italic text-gray-400")}>{value}</span>
         </DetailItem>
       ))}
@@ -113,6 +114,8 @@ export function BodyViewer({
       </div>
     );
   }
+  // The stored size is in bytes; so is the comparison (components.ex used byte_size).
+  const previewBytes = preview == null ? 0 : new TextEncoder().encode(preview).length;
   if (preview == null) {
     return (
       <div className="py-4 text-sm text-gray-500">
@@ -140,9 +143,9 @@ export function BodyViewer({
           <CopyButton value={hash} label="Copy hash" size="sm" />
         </div>
       )}
-      {size != null && size > preview.length && (
+      {size != null && size > previewBytes && (
         <div>
-          Preview: {formatBytes(preview.length)} of {formatBytes(size)}
+          Preview: {formatBytes(previewBytes)} of {formatBytes(size)}
         </div>
       )}
     </div>

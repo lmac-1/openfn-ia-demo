@@ -14,12 +14,12 @@ export type Selection = { kind: "job" | "trigger" | "edge"; id: string } | null;
 /** What the canvas shows while a run is selected. */
 export interface RunOverlay {
   /** Exit state per job id. */
-  steps: Record<string, { state: NodeRunState; duration?: string }>;
+  steps: Record<string, { state: NodeRunState; duration?: string | undefined }>;
   /** The node the run started from (a trigger or a job). */
   startNodeId: string | null;
   startedBy: string;
   /** ISO timestamp, shown on the start node. */
-  startedAt?: string;
+  startedAt?: string | undefined;
 }
 
 interface Props {
@@ -80,7 +80,7 @@ export default function WorkflowDiagram({
     const el = ref.current;
     if (!el) return;
     const observer = new ResizeObserver(([entry]) => {
-      const { width, height } = entry.contentRect;
+      const { width, height } = entry!.contentRect;
       setSize({ width, height });
       if (!fitted.current && width > 0) {
         const bounds = graphBounds(graph);
@@ -99,7 +99,7 @@ export default function WorkflowDiagram({
   const nodeCount = Object.keys(graph.positions).length;
   useEffect(() => {
     fitted.current = fit();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- refit only for a new workflow or a changed node count, as above
   }, [graph.id, nodeCount]);
 
   const zoomBy = (factor: number, cx = size.width / 2, cy = size.height / 2) => {

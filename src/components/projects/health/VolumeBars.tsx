@@ -1,23 +1,40 @@
+import { useState } from "react";
+import { Link } from "../../../routing/router";
+import { cn } from "../../../utils/cn";
 import { formatNumber } from "../../../utils/format";
+import { historyUrl } from "../../../utils/history";
 import type { RunBucket } from "../../../types/workflow-health";
 import { CANCELLED, DOT, EMPTY, FAILED, FRAME, LEGEND, SUCCESS } from "./palette";
 
-const SERIES = [
-  { key: "success", label: "Success", color: SUCCESS },
-  { key: "cancelled", label: "Cancelled", color: CANCELLED },
-  { key: "failed", label: "Failed", color: FAILED },
-] as const;
-
-type SeriesKey = (typeof SERIES)[number]["key"];
-
 /** A run has no `rejected` state, so the red band folds the other five. */
 const RUN_FAILURE_KEYS = ["failed", "crashed", "killed", "exception", "lost"] as const;
+
+// Top to bottom, as the legend and tooltip read; the bars stack the reverse.
+// `states` is what a band counts, and what its History link filters on.
+const SERIES = [
+  { key: "success", label: "Success", color: SUCCESS, states: ["success"] },
+  { key: "cancelled", label: "Cancelled", color: CANCELLED, states: ["cancelled"] },
+  { key: "failed", label: "Failed", color: FAILED, states: RUN_FAILURE_KEYS },
+] as const;
+
+/**
+ * One band of one bar: work orders with a run created in the bar's slot that
+ * ended in one of the band's states. The slot ends where the next bar starts;
+ * the newest bar has no end (VolumeBars.tsx `bucketUrl`).
+ */
+const bucketUrl = (projectId: string, workflowId: string, buckets: RunBucket[], index: number, states: readonly string[]) =>
+  historyUrl(projectId, workflowId, {
+    run_date_after: buckets[index]!.at,
+    run_date_before: buckets[index + 1]?.at,
+    run_status: states,
+  });
 
 const dayLabel = (d: Date, tz: string) => d.toLocaleDateString(undefined, { month: "short", day: "numeric", timeZone: tz });
 const hour = (d: Date, tz: string) =>
   Number(d.toLocaleString("en-GB", { hour: "2-digit", hourCycle: "h23", timeZone: tz }));
 const hourLabel = (h: number) => `${String(h).padStart(2, "0")}:00`;
 
+/** "Oct 14, 14:00 – 16:00"; a daily bar is just its day. */
 function rangeLabel(at: string, hours: number, tz: string) {
   const start = new Date(at);
   if (hours >= 24) return dayLabel(start, tz);
@@ -34,20 +51,27 @@ function tickLabel(at: string, hours: number, tz: string) {
 
 /**
  * "Runs over time": run volume per bucket, stacked Failed / Cancelled /
- * Success from the axis up (VolumeBars.tsx). Plain divs in place of
- * Recharts; each bar's title gives its counts.
+ * Success from the axis up (VolumeBars.tsx). Plain SVG in place of Recharts.
+ * Hovering a bar names its slot and counts; clicking a band opens the runs it
+ * counts in History. The chart is mouse-only and hidden from
+ * assistive tech; the window totals below are its accessible version.
  */
 export default function VolumeBars({
   buckets,
   hours,
   timezone,
   emptyMessage,
+  projectId,
+  workflowId,
 }: {
   buckets: RunBucket[];
   hours: number;
   timezone: string;
   emptyMessage: string;
+  projectId: string;
+  workflowId: string;
 }) {
+  const [hovered, setHovered] = useState<number | null>(null);
   const rows = buckets.map((b) => ({
     at: b.at,
     success: b.success,
@@ -64,7 +88,11 @@ export default function VolumeBars({
   const step = Math.max(1, Math.ceil((max * 1.1) / 4));
   const ceiling = step * 4;
   const ticks = [0, 1, 2, 3, 4].map((i) => i * step);
-  const shown = totals.map((t) => t.key) as SeriesKey[];
+  // Thin the axis to about a dozen labels, keeping the newest bar's. 12-hour
+  // bars are already halved: tickLabel blanks the afternoon ones.
+  const every = hours >= 12 && hours < 24 ? 1 : Math.ceil(rows.length / 13);
+  const n = rows.length;
+  const tip = hovered === null ? undefined : rows[hovered];
 
   return (
     <>
@@ -80,27 +108,57 @@ export default function VolumeBars({
           <div className="h-5" />
         </div>
         <div className="flex flex-1 flex-col">
-          <div className="relative flex flex-1 items-end gap-[1%] border-b border-gray-100">
+          {/* eslint-disable-next-line no-restricted-syntax -- chart geometry: bar gaps scale with the chart */}
+          <div className="relative flex flex-1 items-end gap-[1%] border-b border-gray-100" onMouseLeave={() => setHovered(null)}>
             {ticks.slice(1).map((t, i) => (
-              <div key={i} className="absolute inset-x-0 border-t border-gray-100" style={{ bottom: `${(t / ceiling) * 100}%` }} />
+              <div key={i} className="pointer-events-none absolute inset-x-0 border-t border-gray-100" style={{ bottom: `${(t / ceiling) * 100}%` }} />
             ))}
-            {rows.map((r) => (
+            {rows.map((r, i) => {
+              let base = ceiling;
+              return (
+                <div
+                  key={r.at}
+                  className={cn("relative flex h-full flex-1 justify-center", hovered === i && "bg-gray-50")}
+                  onMouseEnter={() => setHovered(i)}
+                >
+                  <svg viewBox={`0 0 1 ${ceiling}`} preserveAspectRatio="none" className="h-full w-4/5 max-w-16">
+                    {[...totals].reverse().map(({ key, color, states }) => {
+                      if (r[key] === 0) return null;
+                      base -= r[key];
+                      return (
+                        <Link key={key} to={bucketUrl(projectId, workflowId, buckets, i, states)} tabIndex={-1}>
+                          <path d={`M0 ${base}H1V${base + r[key]}H0Z`} fill={color} className="cursor-pointer" />
+                        </Link>
+                      );
+                    })}
+                  </svg>
+                </div>
+              );
+            })}
+            {tip && hovered !== null && (
               <div
-                key={r.at}
-                className="flex h-full flex-1 flex-col-reverse hover:bg-gray-50"
-                title={`${rangeLabel(r.at, hours, timezone)}: ${totals.map((t) => `${t.label} ${r[t.key]}`).join(", ")}`}
+                className="pointer-events-none absolute top-0 z-10 whitespace-nowrap rounded-lg border border-gray-200 bg-white text-xs shadow-lg"
+                // Beside the bar, on the side with more room.
+                style={hovered < n / 2 ? { left: `${((hovered + 1) / n) * 100}%` } : { right: `${((n - hovered) / n) * 100}%` }}
               >
-                {[...shown].reverse().map((k) => {
-                  const color = SERIES.find((s) => s.key === k)!.color;
-                  return <div key={k} className="mx-auto w-4/5 max-w-16" style={{ height: `${(r[k] / ceiling) * 100}%`, backgroundColor: color }} />;
-                })}
+                <p className="border-b border-gray-100 px-3 py-2 font-medium text-gray-900">{rangeLabel(tip.at, hours, timezone)}</p>
+                <ul className="flex flex-col gap-1.5 px-3 py-2 text-gray-700">
+                  {totals.map(({ key, label, color }) => (
+                    <li key={key} className="flex items-center gap-2">
+                      <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: color }} />
+                      <span className="grow pr-4">{label}</span>
+                      <span className="font-medium tabular-nums text-gray-900">{formatNumber(tip[key])}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
-            ))}
+            )}
           </div>
+          {/* eslint-disable-next-line no-restricted-syntax -- chart geometry: bar gaps scale with the chart */}
           <div className="flex h-5 gap-[1%] pt-1 text-xs text-gray-500">
             {rows.map((r, i) => (
               <span key={r.at} className="flex-1 truncate text-center">
-                {hours >= 12 || i % 2 === 0 ? tickLabel(r.at, hours, timezone) : ""}
+                {(n - 1 - i) % every === 0 ? tickLabel(r.at, hours, timezone) : ""}
               </span>
             ))}
           </div>

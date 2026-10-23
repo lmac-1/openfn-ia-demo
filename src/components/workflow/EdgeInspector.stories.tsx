@@ -10,11 +10,11 @@ const meta: Meta<typeof EdgeInspector> = {
   title: "Workflow/EdgeInspector",
   component: EdgeInspector,
   decorators: [withSidePanel()],
-  args: { edge: openhie.edges[1], onChange: () => {}, onDelete: () => {}, onClose: () => {} },
+  args: { edge: openhie.edges[1]!, onChange: () => {}, onDelete: () => {}, onClose: () => {} },
 };
 export default meta;
 type Story = StoryObj<typeof EdgeInspector>;
 
 export const OnSuccess: Story = {};
-export const FromTrigger: Story = { args: { edge: openhie.edges[0] } };
-export const JsExpression: Story = { args: { edge: referrals.edges[1] } };
+export const FromTrigger: Story = { args: { edge: openhie.edges[0]! } };
+export const JsExpression: Story = { args: { edge: referrals.edges[1]! } };

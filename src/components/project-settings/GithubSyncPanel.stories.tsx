@@ -9,7 +9,7 @@ const meta: Meta<typeof GithubSyncPanel> = {
   component: GithubSyncPanel,
   decorators: [withRouter, withGrayPanel],
   args: {
-    vcs: vcsFor(projects[0].id),
+    vcs: vcsFor(projects[0]!.id),
     canInstallGithub: true,
     canInitiateGithubSync: true,
     userGithubConnected: false,
@@ -19,8 +19,8 @@ export default meta;
 type Story = StoryObj<typeof GithubSyncPanel>;
 
 export const NotConfigured: Story = {};
-export const Connected: Story = { args: { vcs: vcsFor(projects[1].id) } };
+export const Connected: Story = { args: { vcs: vcsFor(projects[1]!.id) } };
 export const ConnectAccount: Story = { args: { vcs: { githubEnabled: true, connection: null } } };
 export const ViewerConnected: Story = {
-  args: { vcs: vcsFor(projects[1].id), canInstallGithub: false, canInitiateGithubSync: false },
+  args: { vcs: vcsFor(projects[1]!.id), canInstallGithub: false, canInitiateGithubSync: false },
 };

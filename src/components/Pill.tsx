@@ -40,12 +40,12 @@ export default function Pill({
   square?: boolean;
   mono?: boolean;
   /** Hover text. */
-  title?: string;
+  title?: string | undefined;
   /** Shows an x button that calls this. */
-  onRemove?: () => void;
+  onRemove?: (() => void) | undefined;
   /** Accessible name for the x button. */
   removeLabel?: string;
-  className?: string;
+  className?: string | undefined;
   children: ReactNode;
 }) {
   return (

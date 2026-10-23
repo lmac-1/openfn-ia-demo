@@ -17,7 +17,7 @@ const meta: Meta<typeof FullScreenIDE> = {
   decorators: [withRouter, (Story) => <div className="relative h-[800px]"><Story /></div>],
   args: {
     jobs: graph.jobs,
-    job: graph.jobs[0],
+    job: graph.jobs[0]!,
     onSelectJob: noop,
     onBodyChange: noop,
     onClose: noop,
@@ -55,7 +55,7 @@ export const ViewingRun: Story = {
         projectId={graph.projectId}
         run={run}
         steps={stepsOf(run)}
-        logs={runLogs["run-1"]}
+        logs={runLogs["run-1"]!}
         dataclips={dataclips}
         selectedStepId="step-1a"
         onSelectStep={noop}

@@ -8,7 +8,7 @@ const meta: Meta<typeof CollaboratorsTable> = {
   title: "Project settings/CollaboratorsTable",
   component: CollaboratorsTable,
   args: {
-    members: projects[0].members,
+    members: projects[0]!.members,
     users,
     currentUserId: session.user.id,
     canRemoveProjectUser: true,

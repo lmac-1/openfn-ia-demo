@@ -44,7 +44,7 @@ interface Props<T> {
   /** Extra content at the end of the search box (lg only), e.g. a keyboard hint. */
   inputAddon?: ReactNode;
   /** The row highlighted when the list opens; the first row otherwise. */
-  initialActive?: T;
+  initialActive?: T | undefined;
   /**
    * `lg`: a command palette: a borderless search row over full-width rows
    * that turn primary when highlighted, sections divided by a rule.
@@ -123,7 +123,7 @@ export default function SearchList<T>({
     const active = input.getAttribute("aria-activedescendant");
     if (!active || options.length === 0) return;
     const edge = e.key === "ArrowDown" ? options[options.length - 1] : options[0];
-    if (edge.id !== active) return;
+    if (edge?.id !== active) return;
     e.preventDefault();
     input.dispatchEvent(new globalThis.KeyboardEvent("keydown", { key: e.key === "ArrowDown" ? "PageUp" : "PageDown", bubbles: true }));
   };

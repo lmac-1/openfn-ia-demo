@@ -1,4 +1,4 @@
-import { useState, type InputHTMLAttributes, type ReactNode, type Ref, type SelectHTMLAttributes, type TextareaHTMLAttributes } from "react";
+import { useId, useState, type InputHTMLAttributes, type ReactNode, type Ref, type SelectHTMLAttributes, type TextareaHTMLAttributes } from "react";
 import { cn } from "../utils/cn";
 import { controlClasses } from "./controlClasses";
 import IconButton from "./IconButton";
@@ -10,7 +10,7 @@ import IconButton from "./IconButton";
  * `data-ui="field"` so themes style it like the others.
  */
 
-export function Label({ htmlFor, className, children }: { htmlFor?: string; className?: string; children: ReactNode }) {
+export function Label({ htmlFor, className, children }: { htmlFor?: string | undefined; className?: string | undefined; children: ReactNode }) {
   return (
     <label htmlFor={htmlFor} data-ui="label" className={cn("text-sm/6 font-medium text-gray-800", className)}>
       {children}
@@ -29,16 +29,22 @@ export function FieldError({ children }: { children: ReactNode }) {
 
 interface FieldProps {
   label?: ReactNode;
-  required?: boolean;
+  required?: boolean | undefined;
   /** Help text between the label and the control. */
   hint?: ReactNode;
   errors?: string[];
   /** Classes for the field wrapper (label + control + errors), e.g. `flex-1` to grow in a flex row. `className` styles the control itself. */
-  fieldClassName?: string;
+  fieldClassName?: string | undefined;
+}
+
+/** The control's id, or a generated one, so its label is always linked to it. */
+function useFieldId(id?: string) {
+  const generated = useId();
+  return id ?? generated;
 }
 
 /** A label, optional hint, a control and its errors. */
-export function Field({ id, label, required, hint, errors = [], className, children }: Omit<FieldProps, "fieldClassName"> & { id?: string; className?: string; children: ReactNode }) {
+export function Field({ id, label, required, hint, errors = [], className, children }: Omit<FieldProps, "fieldClassName"> & { id?: string | undefined; className?: string | undefined; children: ReactNode }) {
   return (
     <div className={className} data-ui="form-group" data-invalid={errors.length > 0 || undefined}>
       {label && (
@@ -56,10 +62,11 @@ export function Field({ id, label, required, hint, errors = [], className, child
   );
 }
 
-export function TextInput({ label, required, hint, errors = [], fieldClassName, className, id, ...rest }: FieldProps & InputHTMLAttributes<HTMLInputElement>) {
+export function TextInput({ label, required, hint, errors = [], fieldClassName, className, ...rest }: FieldProps & InputHTMLAttributes<HTMLInputElement>) {
+  const id = useFieldId(rest.id);
   return (
     <Field id={id} label={label} required={required} hint={hint} errors={errors} className={fieldClassName}>
-      <input id={id} type="text" autoComplete="off" required={required} data-ui="field" className={controlClasses(errors.length > 0, className)} {...rest} />
+      <input type="text" autoComplete="off" required={required} data-ui="field" className={controlClasses(errors.length > 0, className)} {...rest} id={id} />
     </Field>
   );
 }
@@ -68,18 +75,19 @@ export function TextInput({ label, required, hint, errors = [], fieldClassName, 
  * Lightning's password `.input` (new_inputs.ex): a text field with an eye
  * button that toggles between hidden and shown.
  */
-export function PasswordInput({ label, required, hint, errors = [], fieldClassName, className, id, ...rest }: FieldProps & Omit<InputHTMLAttributes<HTMLInputElement>, "type">) {
+export function PasswordInput({ label, required, hint, errors = [], fieldClassName, className, ...rest }: FieldProps & Omit<InputHTMLAttributes<HTMLInputElement>, "type">) {
+  const id = useFieldId(rest.id);
   const [revealed, setRevealed] = useState(false);
   return (
     <Field id={id} label={label} required={required} hint={hint} errors={errors} className={fieldClassName}>
       <div className="relative">
         <input
-          id={id}
           type={revealed ? "text" : "password"}
           required={required}
           data-ui="field"
           className={controlClasses(errors.length > 0, cn("pr-10", className))}
           {...rest}
+          id={id}
         />
         <div className="absolute inset-y-0 right-0 flex items-center pr-2">
           <IconButton
@@ -93,10 +101,11 @@ export function PasswordInput({ label, required, hint, errors = [], fieldClassNa
   );
 }
 
-export function TextArea({ label, required, hint, errors = [], fieldClassName, className, id, ...rest }: FieldProps & TextareaHTMLAttributes<HTMLTextAreaElement>) {
+export function TextArea({ label, required, hint, errors = [], fieldClassName, className, ...rest }: FieldProps & TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  const id = useFieldId(rest.id);
   return (
     <Field id={id} label={label} required={required} hint={hint} errors={errors} className={fieldClassName}>
-      <textarea id={id} required={required} data-ui="field" className={controlClasses(errors.length > 0, cn("overflow-y-auto", className))} {...rest} />
+      <textarea required={required} data-ui="field" className={controlClasses(errors.length > 0, cn("overflow-y-auto", className))} {...rest} id={id} />
     </Field>
   );
 }
@@ -119,12 +128,12 @@ export function Select({
   options,
   prompt,
   className,
-  id,
   ...rest
 }: FieldProps & SelectHTMLAttributes<HTMLSelectElement> & { options: SelectOption[]; prompt?: string }) {
+  const id = useFieldId(rest.id);
   return (
     <Field id={id} label={label} required={required} hint={hint} errors={errors} className={fieldClassName}>
-      <select id={id} required={required} data-ui="field" className={controlClasses(errors.length > 0, className)} {...rest}>
+      <select required={required} data-ui="field" className={controlClasses(errors.length > 0, className)} {...rest} id={id}>
         {prompt && <option value="">{prompt}</option>}
         {options.map((o) => {
           const [l, v] = optionParts(o);

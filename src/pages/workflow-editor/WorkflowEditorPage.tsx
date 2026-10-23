@@ -21,7 +21,8 @@ import YAMLImportModal from "../../components/workflow/YAMLImportModal";
 import { workflowNameFromYaml } from "../../components/workflow/workflowYaml";
 import { aiSessionsFor } from "../../mock-data/ai-assistant";
 import { adaptorShortName } from "../../utils/adaptors";
-import { findProject } from "../../mock-data/projects";
+import { findProject, projects } from "../../mock-data/projects";
+import { projectLabel } from "../../components/shell/projectPickerItems";
 import type { Project } from "../../types/projects";
 import { blankWorkflowGraph, newWorkflowGraph, templateGraph } from "../../utils/workflowGraph";
 import { findWorkflowGraph, snapshotsOf, workflowTemplates } from "../../mock-data/workflow";
@@ -52,7 +53,7 @@ export default function WorkflowEditorPage() {
 function WorkflowEditor({ project, initial, isNew }: { project: Project; initial: WorkflowGraph; isNew: boolean }) {
   const editor = useWorkflowEditorState(initial);
   const { graph } = editor;
-  const { params, update } = useUrlParams();
+  const { params, update } = useUrlParams<"chat" | "edge" | "job" | "panel" | "run" | "runMode" | "step" | "trigger">();
   const [pinnedVersion, setPinnedVersion] = useState<number | null>(null);
   const [historyCollapsed, setHistoryCollapsed] = useState(true);
   const [created, setCreated] = useState(!isNew);
@@ -267,6 +268,7 @@ function WorkflowEditor({ project, initial, isNew }: { project: Project; initial
         {!showLanding && (
           <EditorHeader
             project={project}
+            projectLabel={projectLabel(project, projects)}
             workflowName={graph.name}
             snapshots={snapshotsOf(graph)}
             pinnedVersion={pinnedVersion}
@@ -282,10 +284,10 @@ function WorkflowEditor({ project, initial, isNew }: { project: Project; initial
             onRun={() =>
               runs.demoRunId
                 ? followDemoRun(true, isRetryable)
-                : update({ panel: "run", trigger: firstTrigger.id, job: null, edge: null })
+                : update({ panel: "run", trigger: firstTrigger?.id ?? null, job: null, edge: null })
             }
             onRunWithCustomInput={() =>
-              update({ panel: "run", trigger: firstTrigger.id, job: null, edge: null, runMode: "custom" })
+              update({ panel: "run", trigger: firstTrigger?.id ?? null, job: null, edge: null, runMode: "custom" })
             }
             hasChanges={editor.hasChanges || !created}
             onSave={() => {

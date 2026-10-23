@@ -7,7 +7,7 @@ import { projects } from "../../mock-data/projects";
 import { session } from "../../mock-data/users";
 import { withGrayPanel } from "../../stories/decorators";
 
-const project = projects[0];
+const project = projects[0]!;
 
 const meta: Meta<typeof CredentialIndex> = {
   title: "Credentials/CredentialIndex",

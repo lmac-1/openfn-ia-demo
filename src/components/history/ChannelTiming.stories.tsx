@@ -6,6 +6,6 @@ const meta = { title: "History/ChannelTiming", component: ChannelTiming } satisf
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const FullPhases: Story = { args: { event: channelRequests[0].events[0] } };
-export const TtfbOnly: Story = { args: { event: channelRequests[1].events[0] } };
-export const TotalOnly: Story = { args: { event: channelRequests[2].events[0] } };
+export const FullPhases: Story = { args: { event: channelRequests[0]!.events[0]! } };
+export const TtfbOnly: Story = { args: { event: channelRequests[1]!.events[0]! } };
+export const TotalOnly: Story = { args: { event: channelRequests[2]!.events[0]! } };

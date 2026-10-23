@@ -1,4 +1,5 @@
 import type { MouseEvent, ReactNode, TdHTMLAttributes } from "react";
+import { Link } from "../routing/router";
 import { cn } from "../utils/cn";
 
 /**
@@ -44,7 +45,7 @@ export function Tr({
   id,
 }: {
   children: ReactNode;
-  onClick?: () => void;
+  onClick?: (() => void) | undefined;
   className?: string;
   id?: string;
 }) {
@@ -81,6 +82,7 @@ export function Th({
   colSpan,
   sortDirection,
   onSort,
+  sortHref,
   align = "left",
   actions = false,
 }: {
@@ -89,29 +91,41 @@ export function Th({
   colSpan?: number;
   /** When set the header is sortable; "asc" / "desc" marks the active column. */
   sortDirection?: "asc" | "desc" | null;
+  /** Sorts a fully loaded list in the browser. */
   onSort?: () => void;
+  /** Re-sorts a server-sorted list: the sort control links to this URL instead of calling `onSort`. */
+  sortHref?: string | undefined;
   align?: CellAlign;
   /** The row-actions column. With no children the header reads "Actions" to screen readers only. */
   actions?: boolean;
 }) {
   if (actions && children === undefined) children = <span className="sr-only">Actions</span>;
+  const sortContent = (
+    <>
+      {children}
+      <span
+        className={cn(
+          "ml-2 flex-none rounded-sm",
+          sortDirection ? "bg-gray-100 text-gray-900 group-hover:bg-gray-200" : "invisible text-gray-400 group-hover:visible"
+        )}
+      >
+        <span className={cn(sortDirection === "asc" ? "hero-chevron-up" : "hero-chevron-down", "h-5 w-5")} />
+      </span>
+    </>
+  );
   return (
     <th
       scope="col"
       colSpan={colSpan}
       className={cn("text-sm font-semibold text-gray-900 select-none whitespace-nowrap", alignClasses[align], className)}
     >
-      {onSort ? (
+      {sortHref ? (
+        <Link to={sortHref} className="group inline-flex items-center">
+          {sortContent}
+        </Link>
+      ) : onSort ? (
         <button type="button" onClick={onSort} className="group inline-flex items-center">
-          {children}
-          <span
-            className={cn(
-              "ml-2 flex-none rounded-sm",
-              sortDirection ? "bg-gray-100 text-gray-900 group-hover:bg-gray-200" : "invisible text-gray-400 group-hover:visible"
-            )}
-          >
-            <span className={cn(sortDirection === "asc" ? "hero-chevron-up" : "hero-chevron-down", "h-5 w-5")} />
-          </span>
+          {sortContent}
         </button>
       ) : (
         children
@@ -146,6 +160,7 @@ export function Td({
  * `children` go below the message (e.g. an error code).
  */
 export function EmptyState({
+  id,
   variant = "dashed",
   icon = variant === "dashed" ? "hero-plus-circle" : undefined,
   title,
@@ -156,12 +171,14 @@ export function EmptyState({
   className,
   children,
 }: {
+  /** The box's id (the button's, when it is one), for hosts that address it. */
+  id?: string | undefined;
   variant?: "dashed" | "plain";
   icon?: string;
   title?: ReactNode;
   message?: ReactNode;
   buttonText?: string;
-  onClick?: () => void;
+  onClick?: (() => void) | undefined;
   disabled?: boolean;
   className?: string;
   children?: ReactNode;
@@ -184,6 +201,7 @@ export function EmptyState({
   if (buttonText && !plain) {
     return (
       <button
+        id={id}
         type="button"
         onClick={onClick}
         disabled={disabled}
@@ -196,7 +214,7 @@ export function EmptyState({
     );
   }
   return (
-    <div data-ui="empty-state" data-variant={variant} className={classes}>
+    <div id={id} data-ui="empty-state" data-variant={variant} className={classes}>
       {body}
     </div>
   );

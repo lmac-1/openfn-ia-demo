@@ -11,9 +11,9 @@ import Markdown from "./Markdown";
 interface Props {
   id: string;
   annotation: Annotation | null;
-  inventory?: InventoryRow;
+  inventory?: InventoryRow | undefined;
   /** Called with an id from the annotation's `inherits` / `flows` lists. */
-  onOpenId?: (id: string) => void;
+  onOpenId?: ((id: string) => void) | undefined;
   inventoryHref?: string;
 }
 
@@ -31,7 +31,7 @@ function statusColor(status: string): PillColor {
   return statusColors[status] ?? (status.startsWith("batch-") ? "yellow" : "gray");
 }
 
-function IdList({ label, ids, onOpenId }: { label: string; ids: string[]; onOpenId?: (id: string) => void }) {
+function IdList({ label, ids, onOpenId }: { label: string; ids: string[]; onOpenId?: ((id: string) => void) | undefined }) {
   if (ids.length === 0) return null;
   return (
     <div className="flex flex-wrap items-center gap-1.5 text-xs">
@@ -52,8 +52,8 @@ function IdList({ label, ids, onOpenId }: { label: string; ids: string[]; onOpen
  */
 export default function AnnotationCard({ id, annotation, inventory, onOpenId, inventoryHref }: Props) {
   const fm = annotation?.frontMatter ?? {};
-  const title = typeof fm.title === "string" ? fm.title : id;
-  const status = typeof fm.status === "string" ? fm.status : null;
+  const title = typeof fm["title"] === "string" ? fm["title"] : id;
+  const status = typeof fm["status"] === "string" ? fm["status"] : null;
   const list = (key: string) => (Array.isArray(fm[key]) ? (fm[key] as string[]) : []);
 
   return (

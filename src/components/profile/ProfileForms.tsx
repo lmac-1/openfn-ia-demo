@@ -1,67 +1,67 @@
-import { useState, type FormEvent, type ReactNode } from "react";
+import type { FormEvent, ReactNode } from "react";
+import Alert from "../Alert";
 import Button from "../Button";
 import Card from "../Card";
 import InfoTooltip from "../InfoTooltip";
 import { PasswordInput, Select, TextInput } from "../Inputs";
 import type { User } from "../../types/users";
 import { contactPreferenceOptions, contactPreferenceTooltip } from "../../constants";
-import { isValidEmail } from "../../utils/validate";
+import { errorMessage } from "../../utils/errors";
+import { useForm } from "../../utils/useForm";
+import { blank, isValidEmail } from "../../utils/validate";
 
 /**
  * The three forms of ProfileLive.FormComponent (profile_live/form_component.html.heex),
- * each its own card. Static: submitting only updates local state.
+ * each its own card. Each `on*` handler may be async; a failure shows in the card.
  */
 
-function FormCard({ id, title, onSubmit, children, button }: { id: string; title: string; onSubmit: () => void; children: ReactNode; button: ReactNode }) {
-  const submit = (e: FormEvent) => {
-    e.preventDefault();
-    onSubmit();
-  };
+function FormCard({
+  id,
+  title,
+  onSubmit,
+  error,
+  children,
+  button,
+}: {
+  id: string;
+  title: string;
+  onSubmit: (e: FormEvent) => void;
+  error: Error | null;
+  children: ReactNode;
+  button: ReactNode;
+}) {
   return (
-    <form id={id} onSubmit={submit} data-annotation="profile-account">
+    <form id={id} onSubmit={onSubmit} data-annotation="profile-account">
       <Card padding="lg" title={title} className="space-y-6">
         {children}
+        {error && <Alert type="danger">{errorMessage(error)}</Alert>}
         {button}
       </Card>
     </form>
   );
 }
 
-export function BasicInfoForm({ user, onSave }: { user: User; onSave?: (u: Pick<User, "firstName" | "lastName" | "contactPreference">) => void }) {
-  const [saved, setSaved] = useState({ firstName: user.firstName, lastName: user.lastName, contactPreference: user.contactPreference });
-  const [values, setValues] = useState(saved);
-  const changed = JSON.stringify(values) !== JSON.stringify(saved);
-  const valid = values.firstName.trim() !== "" && values.lastName.trim() !== "";
+type BasicInfo = Pick<User, "firstName" | "lastName" | "contactPreference">;
+
+export function BasicInfoForm({ user, onSave }: { user: User; onSave?: (u: BasicInfo) => Promise<void> }) {
+  const form = useForm<BasicInfo>({
+    initial: { firstName: user.firstName, lastName: user.lastName, contactPreference: user.contactPreference },
+    validate: ({ firstName, lastName }) => ({ firstName: blank(firstName), lastName: blank(lastName) }),
+  });
   return (
     <FormCard
       id="basic-info-form"
       title="Change basic information"
-      onSubmit={() => {
-        setSaved(values);
-        onSave?.(values);
-      }}
+      onSubmit={form.submit(async (values) => onSave?.(values))}
+      error={form.error}
       button={
-        <Button type="submit" disabled={!valid || !changed}>
+        <Button type="submit" disabled={!form.dirty} pending={form.pending}>
           Save
         </Button>
       }
     >
-      <TextInput
-        label="First name"
-        required
-        autoComplete="given-name"
-        value={values.firstName}
-        errors={values.firstName.trim() ? [] : ["can't be blank"]}
-        onChange={(e) => setValues((v) => ({ ...v, firstName: e.target.value }))}
-      />
-      <TextInput
-        label="Last name"
-        required
-        autoComplete="family-name"
-        value={values.lastName}
-        errors={values.lastName.trim() ? [] : ["can't be blank"]}
-        onChange={(e) => setValues((v) => ({ ...v, lastName: e.target.value }))}
-      />
+      <TextInput label="First name" required autoComplete="given-name" {...form.fieldProps("firstName")} />
+      <TextInput label="Last name" required autoComplete="family-name" {...form.fieldProps("lastName")} />
       <Select
         label={
           <>
@@ -70,74 +70,64 @@ export function BasicInfoForm({ user, onSave }: { user: User; onSave?: (u: Pick<
           </>
         }
         options={contactPreferenceOptions}
-        value={values.contactPreference}
-        onChange={(e) => setValues((v) => ({ ...v, contactPreference: e.target.value as User["contactPreference"] }))}
+        {...form.fieldProps("contactPreference")}
       />
     </FormCard>
   );
 }
 
-export function ChangeEmailForm({ onSubmit }: { onSubmit?: (email: string) => void }) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const valid = isValidEmail(email) && password !== "";
+export function ChangeEmailForm({ onSubmit }: { onSubmit?: (email: string) => Promise<void> }) {
+  const form = useForm({
+    initial: { email: "", password: "" },
+    validate: ({ email, password }) => ({
+      email: email.trim() && !isValidEmail(email) ? ["must be a valid email address"] : blank(email),
+      password: blank(password),
+    }),
+    clearOnSave: true,
+  });
   return (
     <FormCard
       id="email-form"
       title="Change email"
-      onSubmit={() => onSubmit?.(email)}
+      onSubmit={form.submit(async ({ email }) => onSubmit?.(email))}
+      error={form.error}
       button={
-        <Button type="submit" disabled={!valid}>
+        <Button type="submit" pending={form.pending}>
           Update email
         </Button>
       }
     >
-      <TextInput label="New email address" required value={email} onChange={(e) => setEmail(e.target.value)} />
-      <PasswordInput
-        label="Enter password to confirm"
-        required
-        autoComplete="current-password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
+      <TextInput label="New email address" required {...form.fieldProps("email")} />
+      <PasswordInput label="Enter password to confirm" required autoComplete="current-password" {...form.fieldProps("password")} />
     </FormCard>
   );
 }
 
-export function ChangePasswordForm({ onSubmit }: { onSubmit?: () => void }) {
-  const [values, setValues] = useState({ password: "", confirmation: "", current: "" });
-  const set = (k: keyof typeof values) => (e: { target: { value: string } }) => setValues((v) => ({ ...v, [k]: e.target.value }));
-  const tooShort = values.password !== "" && values.password.length < 12;
-  const mismatch = values.confirmation !== "" && values.confirmation !== values.password;
-  const valid = values.password.length >= 12 && !mismatch && values.confirmation !== "" && values.current !== "";
+export function ChangePasswordForm({ onSubmit }: { onSubmit?: () => Promise<void> }) {
+  const form = useForm({
+    initial: { password: "", confirmation: "", current: "" },
+    validate: ({ password, confirmation, current }) => ({
+      password: password.trim() && password.length < 12 ? ["should be at least 12 character(s)"] : blank(password),
+      confirmation: confirmation !== password ? ["does not match password"] : [],
+      current: blank(current),
+    }),
+    clearOnSave: true,
+  });
   return (
     <FormCard
       id="password-form"
       title="Change password"
-      onSubmit={() => onSubmit?.()}
+      onSubmit={form.submit(async () => onSubmit?.())}
+      error={form.error}
       button={
-        <Button type="submit" disabled={!valid}>
+        <Button type="submit" pending={form.pending}>
           Update password
         </Button>
       }
     >
-      <PasswordInput
-        label="New password"
-        required
-        autoComplete="new-password"
-        value={values.password}
-        onChange={set("password")}
-        errors={tooShort ? ["should be at least 12 character(s)"] : []}
-      />
-      <PasswordInput
-        label="Confirm new password"
-        required
-        autoComplete="new-password"
-        value={values.confirmation}
-        onChange={set("confirmation")}
-        errors={mismatch ? ["does not match password"] : []}
-      />
-      <PasswordInput label="Current password" required autoComplete="current-password" value={values.current} onChange={set("current")} />
+      <PasswordInput label="New password" required autoComplete="new-password" {...form.fieldProps("password")} />
+      <PasswordInput label="Confirm new password" required autoComplete="new-password" {...form.fieldProps("confirmation")} />
+      <PasswordInput label="Current password" required autoComplete="current-password" {...form.fieldProps("current")} />
     </FormCard>
   );
 }

@@ -41,7 +41,7 @@ export default function RunViewerPanel({ projectId, run, steps, logs, dataclips,
     const d = clip(id);
     if (!id || !d) return empty(emptyFinished);
     if (d.wiped) return empty("This dataclip has been wiped by the project's data retention policy.");
-    return <CodeEditor value={JSON.stringify(d.body, null, 2)} readOnly ariaLabel={`${activeTab} dataclip`} />;
+    return <CodeEditor value={JSON.stringify(d.body, null, 2)} language="json" readOnly ariaLabel={`${activeTab} dataclip`} />;
   };
 
   return (
@@ -82,6 +82,7 @@ export default function RunViewerPanel({ projectId, run, steps, logs, dataclips,
                 const selected = s.id === selectedStepId;
                 return (
                   <li key={s.id}>
+                    {/* eslint-disable-next-line no-restricted-syntax -- a whole step row is the control */}
                     <button
                       type="button"
                       onClick={() => onSelectStep(s)}

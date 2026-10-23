@@ -14,7 +14,7 @@ export default function TableTitle({
   className,
 }: {
   title: ReactNode;
-  count?: number;
+  count?: number | undefined;
   /** Actions on the right, e.g. a search box and a create button. */
   children?: ReactNode;
   className?: string;
@@ -23,7 +23,12 @@ export default function TableTitle({
     <div className={cn("mb-3 flex items-center justify-between gap-2", className)}>
       <Heading size="xl">
         {title}
-        {count !== undefined && <span className="text-base font-normal"> ({count})</span>}
+        {count !== undefined && (
+          <>
+            {" "}
+            <span className="text-base font-normal">({count})</span>
+          </>
+        )}
       </Heading>
       {children && <div className="flex items-center gap-2">{children}</div>}
     </div>

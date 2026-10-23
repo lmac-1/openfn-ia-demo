@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useInstanceInfo } from "../../session/session";
 import { SidebarLogo } from "../shell/Sidebar";
 
 /**
@@ -7,13 +8,14 @@ import { SidebarLogo } from "../shell/Sidebar";
  * empty (no user menu, no items, no project picker), just the footer logo.
  */
 export default function FirstSetupShell({ children }: { children: ReactNode }) {
+  const { releaseLabel } = useInstanceInfo();
   return (
     <main className="flex h-screen">
       <div className="w-48 shrink-0" />
-      <div id="sidebar-panel" data-ui="sidebar" className="fixed z-[100] flex h-full w-48 flex-col">
+      <div id="sidebar-panel" data-ui="sidebar" className="fixed z-100 flex h-full w-48 flex-col">
         <div className="app-logo-container h-20" />
         <nav id="side-menu" className="flex flex-1 flex-col justify-end overflow-hidden">
-          <SidebarLogo />
+          <SidebarLogo releaseLabel={releaseLabel} />
           <div className="mt-2 h-8 border-t border-white/10" />
         </nav>
       </div>

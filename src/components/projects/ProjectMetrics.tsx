@@ -5,16 +5,29 @@ import TextLink from "../TextLink";
 /**
  * The four stat cards on the workflows index (DashboardComponents
  * .project_metrics): Work Orders, Runs, Successful Runs, and Work Orders in
- * failed state, each over the last 30 days.
+ * failed state, each over the last 30 days. The two links lead to History
+ * filtered to the work orders behind the number; the host builds them.
  */
-export default function ProjectMetrics({ metrics, projectId }: { metrics: Metrics; projectId: string }) {
+export default function ProjectMetrics({
+  metrics,
+  projectId,
+  pendingHref,
+  failedHref,
+}: {
+  metrics: Metrics;
+  projectId: string;
+  /** History filtered to pending and running work orders in the window. */
+  pendingHref?: string | undefined;
+  /** History filtered to every failure state in the window. */
+  failedHref?: string | undefined;
+}) {
   const history = `/projects/${projectId}/history`;
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
       <MetricCard
         title="Work Orders"
         value={metrics.workOrders.total}
-        suffix={<TextLink to={history}>{metrics.workOrders.pending} pending</TextLink>}
+        suffix={<TextLink to={pendingHref ?? history}>{metrics.workOrders.pending} pending</TextLink>}
       />
       <MetricCard title="Runs" value={metrics.runs.total} suffix={`${metrics.runs.pending} pending`} />
       <MetricCard
@@ -26,7 +39,7 @@ export default function ProjectMetrics({ metrics, projectId }: { metrics: Metric
         title="Work Orders in failed state"
         value={metrics.workOrders.failed}
         suffix={`${metrics.workOrders.failedPercentage.toFixed(1)}%`}
-        link={<TextLink to={history}>View all</TextLink>}
+        link={<TextLink to={failedHref ?? history}>View all</TextLink>}
       />
     </div>
   );

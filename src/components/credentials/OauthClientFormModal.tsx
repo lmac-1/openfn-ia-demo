@@ -15,7 +15,7 @@ interface Props {
   open: boolean;
   onClose: () => void;
   /** Set to edit an existing client. */
-  client?: OauthClient;
+  client?: OauthClient | undefined;
   projects?: Project[];
   defaultProjectIds?: string[];
   /** Superusers may make a client global. */

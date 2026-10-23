@@ -2,10 +2,12 @@ import type { Meta, StoryObj } from "@storybook/react";
 import AuthProviderForm from "./AuthProviderForm";
 import { authProvider, emptyAuthProvider } from "../../mock-data/admin";
 
+const resolve = async () => {};
+
 const meta: Meta<typeof AuthProviderForm> = {
   title: "Admin/AuthProviderForm",
   component: AuthProviderForm,
-  args: { provider: emptyAuthProvider },
+  args: { provider: emptyAuthProvider, onSave: resolve, onTest: resolve, onRemove: resolve },
 };
 export default meta;
 type Story = StoryObj<typeof AuthProviderForm>;

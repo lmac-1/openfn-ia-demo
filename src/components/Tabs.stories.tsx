@@ -10,7 +10,7 @@ export default meta;
 type Story = StoryObj<typeof Tabs>;
 
 function Stateful(props: Partial<React.ComponentProps<typeof Tabs>> & { tabs: Tab[] }) {
-  const [active, setActive] = useState(props.tabs[0].id);
+  const [active, setActive] = useState(props.tabs[0]!.id);
   return <Tabs {...props} active={active} onChange={setActive} />;
 }
 

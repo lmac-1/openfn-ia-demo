@@ -1,4 +1,3 @@
-import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Button from "../../components/Button";
 import Header from "../../components/Header";
 import { Centered, PageContent } from "../../components/PageContent";
@@ -6,28 +5,50 @@ import AdminProjectForm from "../../components/admin/AdminProjectForm";
 import AdminProjectsTable from "../../components/admin/AdminProjectsTable";
 import ProjectDeletionModal from "../../components/project-settings/ProjectDeletionModal";
 import { useToast } from "../../components/Toast";
-import { adminProjectRows, projectScheduledDeletions } from "../../mock-data/admin";
-import { purgeDeletedAfterDays } from "../../mock-data/project-settings";
-import { findProject } from "../../mock-data/projects";
-import { users } from "../../mock-data/users";
+import type { AdminDeleteProject, AdminProjectForm as FormData, AdminProjectFormValues, AdminProjectRow } from "../../types/admin";
+import { errorMessage } from "../../utils/errors";
+import { useAction } from "../../utils/useAction";
+
+/** The contract between this page and whatever feeds it (the replica wrapper, later Lightning). */
+export interface AdminProjectsPageProps {
+  /** Every project on the instance; the page sorts and filters them. */
+  projects: AdminProjectRow[];
+  /** The form while the route has it open (/new, /:id); null on the list. */
+  form: FormData | null;
+  /** The project whose deletion dialog is open (/:id/delete); otherwise null. */
+  deleteProject: AdminDeleteProject | null;
+  /** Days until a scheduled project is purged; 0 means today. */
+  gracePeriodDays: number;
+  /** Saves the open form. Resolves when the host has it (it then returns to the list); rejects with field errors or a message. */
+  onSave: (values: AdminProjectFormValues) => Promise<void>;
+  /** Schedules the open dialog's project for deletion, or purges it now if already scheduled. Rejects with the reason, shown in the dialog. */
+  onDelete: (nameConfirmation: string) => Promise<void>;
+  /** Cancels a scheduled deletion. Rejects on failure, which the page toasts. */
+  onCancelDeletion: (id: string) => Promise<void>;
+  /** Closes the deletion dialog. */
+  onClose: () => void;
+}
 
 /**
  * Inventory view `admin-projects` (ProjectLive.Index): the table at
- * /settings/projects, the form at /new and /:projectId, the delete modal at
- * /:projectId/delete.
+ * /settings/projects, the form at /new and /:id, the deletion dialog at
+ * /:id/delete. Which one shows is the host's to say, through `form` and
+ * `deleteProject`. Props only, so it can run unchanged in Lightning; the
+ * replica's data and routing live in AdminProjectsPage.replica.tsx.
  */
-export default function AdminProjectsPage() {
-  const { projectId } = useParams();
-  const { pathname } = useLocation();
-  const navigate = useNavigate();
-  const back = () => navigate("/settings/projects");
+export default function AdminProjectsPage({
+  projects,
+  form,
+  deleteProject,
+  gracePeriodDays,
+  onSave,
+  onDelete,
+  onCancelDeletion,
+  onClose,
+}: AdminProjectsPageProps) {
   const toast = useToast();
-
-  const isNew = pathname.endsWith("/settings/projects/new");
-  const isDelete = pathname.endsWith("/delete");
-  const project = projectId ? findProject(projectId) : undefined;
-  const isForm = isNew || (!isDelete && !!project);
-  const title = isNew ? "New Project" : isForm ? "Edit Project" : "Projects";
+  const cancel = useAction(onCancelDeletion, { onError: (e) => toast(errorMessage(e), "error") });
+  const title = form ? (form.project ? "Edit Project" : "New Project") : "Projects";
 
   return (
     <PageContent
@@ -41,34 +62,19 @@ export default function AdminProjectsPage() {
       }
     >
       <Centered>
-        {isDelete && project && (
+        {deleteProject && (
           <ProjectDeletionModal
-            key={project.id}
-            project={project}
-            gracePeriodDays={purgeDeletedAfterDays}
-            onCancel={back}
-            onDelete={() => {
-              toast(
-                projectScheduledDeletions[project.id]
-                  ? "Project deletion started. This may take a while to complete."
-                  : "Project scheduled for deletion"
-              );
-              back();
-            }}
+            key={deleteProject.id}
+            project={deleteProject}
+            gracePeriodDays={gracePeriodDays}
+            onCancel={onClose}
+            onDelete={onDelete}
           />
         )}
-        {isForm ? (
-          <AdminProjectForm
-            key={project?.id ?? "new"}
-            project={isNew ? undefined : project}
-            users={users}
-            onSave={() => {
-              toast(isNew ? "Project created successfully" : "Project updated successfully");
-              back();
-            }}
-          />
+        {form ? (
+          <AdminProjectForm key={form.project?.id ?? "new"} project={form.project ?? undefined} users={form.users} onSave={onSave} />
         ) : (
-          <AdminProjectsTable projects={adminProjectRows()} onCancelDeletion={() => toast("Project deletion canceled")} />
+          <AdminProjectsTable projects={projects} onCancelDeletion={(project) => void cancel.run(project.id)} />
         )}
       </Centered>
     </PageContent>

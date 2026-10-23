@@ -13,7 +13,7 @@ const meta: Meta<typeof EditorHeader> = {
   decorators: [withRouter],
   parameters: { layout: "fullscreen" },
   args: {
-    project: projects[0],
+    project: projects[0]!,
     workflowName: graph.name,
     snapshots: snapshotsOf(graph),
     pinnedVersion: null,
@@ -40,5 +40,5 @@ export const EnabledWithUnsavedChanges: Story = { args: { enabled: true, hasChan
 export const PinnedVersion: Story = { args: { pinnedVersion: 10 } };
 export const IDEOpen: Story = { args: { runDisabled: true } };
 export const Sandbox: Story = {
-  args: { project: projects.find((p) => p.parentId !== null) ?? projects[0], workflowName: "OpenHIE Workflow" },
+  args: { project: projects.find((p) => p.parentId !== null) ?? projects[0]!, workflowName: "OpenHIE Workflow" },
 };

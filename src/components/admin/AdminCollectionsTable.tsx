@@ -20,8 +20,9 @@ interface Props {
 /**
  * The instance-wide collections table (collection_live/components.ex
  * `collections_table`): a "Collections (n)" title with "Create collection",
- * then name / project / used storage with Edit and Delete per row. With no
- * collections it's the dashed "Create a new one." box.
+ * then name / project / used storage with Edit and Delete per row, sorted in
+ * the browser. With no collections it's the dashed "Create a new one." box.
+ * Ids are Lightning's.
  */
 export default function AdminCollectionsTable({ collections, onCreate, onEdit, onDelete }: Props) {
   const { rows, thProps } = useTableSort({ rows: collections, sortMap, initialKey: "name" });
@@ -29,6 +30,7 @@ export default function AdminCollectionsTable({ collections, onCreate, onEdit, o
   if (collections.length === 0) {
     return (
       <EmptyState
+        id="open-create-collection-modal-big-buttton"
         icon="hero-plus-circle"
         message="No collection found."
         buttonText="Create a new one."
@@ -61,10 +63,22 @@ export default function AdminCollectionsTable({ collections, onCreate, onEdit, o
             <Td className="max-w-100 wrap-break-word">{collection.projectName}</Td>
             <Td className="max-w-100 wrap-break-word">{formatBytes(collection.byteSizeSum)}</Td>
             <Td actions>
-              <Button theme="secondary" size="xs" onClick={() => onEdit(collection)}>
+              <Button
+                id={`edit-collection-${collection.id}-button`}
+                aria-label={`Edit ${collection.name}`}
+                theme="secondary"
+                size="xs"
+                onClick={() => onEdit(collection)}
+              >
                 Edit
               </Button>
-              <Button theme="secondary" size="xs" onClick={() => onDelete(collection)}>
+              <Button
+                id={`delete-collection-${collection.id}-button`}
+                aria-label={`Delete ${collection.name}`}
+                theme="secondary"
+                size="xs"
+                onClick={() => onDelete(collection)}
+              >
                 Delete
               </Button>
             </Td>

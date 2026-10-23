@@ -43,6 +43,7 @@ export default function YAMLImportModal({ isOpen, onClose, onCreate }: Props) {
       <div className="h-80">
         {mode === "upload" ? (
           <Card dashed padding="none" className="relative h-full hover:border-gray-400">
+            {/* eslint-disable-next-line no-restricted-syntax -- file input stretched over the drop zone, which is the control */}
             <input
               id="workflow-file"
               aria-label="Upload a file"
@@ -70,7 +71,7 @@ export default function YAMLImportModal({ isOpen, onClose, onCreate }: Props) {
           </Card>
         ) : (
           <div className="h-full overflow-hidden rounded-lg">
-            <CodeEditor value={yaml} onChange={setYaml} ariaLabel="Workflow YAML" />
+            <CodeEditor value={yaml} onChange={setYaml} language="yaml" ariaLabel="Workflow YAML" />
           </div>
         )}
       </div>

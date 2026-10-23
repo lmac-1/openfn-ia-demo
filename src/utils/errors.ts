@@ -8,9 +8,9 @@ export class RequestError extends Error {
   /** Per-field messages, keyed by field name, when the server rejected a form. */
   readonly fieldErrors: Record<string, string[]>;
   /** HTTP status or channel reply code, when there is one. */
-  readonly status?: number;
+  readonly status?: number | undefined;
 
-  constructor(message: string, options: { fieldErrors?: Record<string, string[]>; status?: number } = {}) {
+  constructor(message: string, options: { fieldErrors?: Record<string, string[]> | undefined; status?: number } = {}) {
     super(message);
     this.name = "RequestError";
     this.fieldErrors = options.fieldErrors ?? {};

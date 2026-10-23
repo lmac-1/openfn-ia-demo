@@ -67,6 +67,9 @@ export const HEALTH_RANGES: HealthRange[] = [
 
 export const DEFAULT_HEALTH_DAYS: HealthRange["days"] = "7";
 
+/** What a health panel says when its endpoint fails (useHealthQuery.ts). */
+export const HEALTH_LOAD_ERROR = "Could not load workflow stats. Refresh to try again.";
+
 /** Lightning's sandbox colour palette (`SandboxLive.Components.@color_palette`). */
 export const sandboxColorPalette = [
   "#870d4c",

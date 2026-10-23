@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import { ReactRouterAdapter } from "../../routing/ReactRouterAdapter";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import AppShell from "./AppShell";
 import Header from "../Header";
@@ -18,15 +19,17 @@ const Body = () => (
 
 const at = (path: string) => () => (
   <MemoryRouter initialEntries={[path]}>
-    <Routes>
-      <Route element={<AppShell />}>
-        <Route path="/projects/:projectId/*" element={<Body />} />
-        <Route path="*" element={<Body />} />
-      </Route>
-    </Routes>
+    <ReactRouterAdapter>
+      <Routes>
+        <Route element={<AppShell />}>
+          <Route path="/projects/:projectId/*" element={<Body />} />
+          <Route path="*" element={<Body />} />
+        </Route>
+      </Routes>
+    </ReactRouterAdapter>
   </MemoryRouter>
 );
 
-export const Project: StoryObj = { render: at(`/projects/${projects[0].id}/w`) };
+export const Project: StoryObj = { render: at(`/projects/${projects[0]!.id}/w`) };
 export const Profile: StoryObj = { render: at("/profile") };
 export const Admin: StoryObj = { render: at("/settings/projects") };

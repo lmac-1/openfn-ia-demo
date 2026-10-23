@@ -1,4 +1,4 @@
-import type { User } from "../../types/users";
+import type { AdminUserRow as User } from "../../types/admin";
 import SearchInput from "../SearchInput";
 import ButtonMenu from "../ButtonMenu";
 import { MenuItem } from "../Menu";

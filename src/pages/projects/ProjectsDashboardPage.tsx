@@ -3,27 +3,37 @@ import Button from "../../components/Button";
 import Header from "../../components/Header";
 import { Centered, PageContent } from "../../components/PageContent";
 import CreateProjectModal from "../../components/projects/CreateProjectModal";
-import { useToast } from "../../components/Toast";
 import ProjectsTable from "../../components/projects/ProjectsTable";
 import WelcomeBanner from "../../components/projects/WelcomeBanner";
-import { projectsOverviewFor } from "../../mock-data/dashboard-stats";
-import { useCurrentUser } from "../../session/session";
+import type { ProjectOverview } from "../../types/workflows";
+
+/** The contract between this page and whatever feeds it (the replica wrapper, later Lightning). */
+export interface ProjectsDashboardPageProps {
+  /** The signed-in user's first name, for the greeting. */
+  firstName: string;
+  /** The user's projects with their counts, as the server lists them; the table sorts them. */
+  projects: ProjectOverview[];
+  /**
+   * Creates a project. Rejects on failure; field errors keyed `rawName` and
+   * `description` show on the form. The host announces success.
+   */
+  onCreate: (project: { name: string; description: string }) => Promise<void>;
+}
 
 /**
  * Inventory view `projects-dashboard` (DashboardLive.Index): the greeting,
- * the user's projects, and the Create project modal.
+ * the user's projects, and the Create project modal. Props only, so it can
+ * run unchanged in Lightning; the replica's data and toasts live in
+ * ProjectsDashboardPage.replica.tsx.
  */
-export default function ProjectsDashboardPage() {
-  const currentUser = useCurrentUser();
+export default function ProjectsDashboardPage({ firstName, projects, onCreate }: ProjectsDashboardPageProps) {
   const [creating, setCreating] = useState(false);
-  const toast = useToast();
-  const projects = projectsOverviewFor(currentUser.id);
 
   return (
     <PageContent header={<Header title="Projects" />}>
       <Centered>
         <div className="-mt-6">
-          <WelcomeBanner firstName={currentUser.firstName} />
+          <WelcomeBanner firstName={firstName} />
           <div id="user-projects-section">
             <ProjectsTable
               projects={projects}
@@ -35,11 +45,7 @@ export default function ProjectsDashboardPage() {
               }
             />
           </div>
-          <CreateProjectModal
-            open={creating}
-            onClose={() => setCreating(false)}
-            onCreate={() => toast("Project created successfully")}
-          />
+          <CreateProjectModal open={creating} onClose={() => setCreating(false)} onCreate={onCreate} />
         </div>
       </Centered>
     </PageContent>

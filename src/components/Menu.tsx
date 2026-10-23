@@ -8,7 +8,7 @@ import {
   MenuSeparator,
 } from "@headlessui/react";
 import { Fragment, type MouseEvent, type ReactNode } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "../routing/router";
 import { cn } from "../utils/cn";
 import { floatingPanelClasses, type FloatingAlign, type PanelProps } from "./floating";
 
@@ -19,11 +19,13 @@ interface MenuProps {
    */
   trigger: ReactNode;
   /** Which edge of the trigger the menu lines up with. */
-  align?: FloatingAlign;
+  align?: FloatingAlign | undefined;
   /** Width class for the menu, e.g. `w-56`. */
-  className?: string;
+  className?: string | undefined;
   /** Extra attributes for the open panel, e.g. `data-annotation`. The panel is portalled, so it doesn't inherit its trigger's. */
   panelProps?: PanelProps;
+  /** Whether the rest of the page goes inert while the menu is open. Off for chrome such as the account menu, which Lightning left interactive. */
+  modal?: boolean;
   children: ReactNode;
 }
 
@@ -31,12 +33,13 @@ interface MenuProps {
  * A dropdown list of actions or choices, opened from a trigger. Keyboard
  * navigation, typeahead and closing on select or click-away come with it.
  */
-export default function Menu({ trigger, align = "end", className = "w-56", panelProps, children }: MenuProps) {
+export default function Menu({ trigger, align = "end", className = "w-56", panelProps, modal = true, children }: MenuProps) {
   return (
     <HeadlessMenu>
       <MenuButton as={Fragment}>{trigger}</MenuButton>
       <MenuItems
         anchor={{ to: `bottom ${align}`, gap: 8 }}
+        modal={modal}
         transition
         data-ui="menu"
         {...panelProps}
@@ -59,14 +62,14 @@ interface MenuItemProps {
   /** Marks the current choice with a check. */
   selected?: boolean;
   tone?: "default" | "danger";
-  disabled?: boolean;
+  disabled?: boolean | undefined;
   /** A muted line under the label. */
   description?: ReactNode;
   children: ReactNode;
 }
 
 /** One row of a Menu: a button, router link or external link. */
-export function MenuItem({ icon, to, href, onClick, selected, tone = "default", disabled, description, children }: MenuItemProps) {
+export function MenuItem({ icon, to, href, onClick, selected, tone = "default", disabled = false, description, children }: MenuItemProps) {
   const className = cn(
     "group flex w-full items-start gap-x-3 px-4 py-2 text-left text-sm cursor-pointer",
     "data-focus:bg-gray-100 data-focus:outline-none data-disabled:cursor-not-allowed data-disabled:opacity-50",
@@ -100,6 +103,23 @@ export function MenuItem({ icon, to, href, onClick, selected, tone = "default", 
   return (
     <HeadlessMenuItem as="button" type="button" disabled={disabled} className={className} onClick={onClick}>
       {content}
+    </HeadlessMenuItem>
+  );
+}
+
+/**
+ * An inline link inside other menu content, e.g. a notice's "Turn off in
+ * your profile". A menu item, so the arrow keys reach it and a click closes
+ * the menu; it takes its colour from the text around it.
+ */
+export function MenuLink({ to, children }: { to: string; children: ReactNode }) {
+  return (
+    <HeadlessMenuItem
+      as={Link}
+      to={to}
+      className="font-medium underline underline-offset-2 data-focus:outline-2 data-focus:outline-offset-2 data-focus:outline-primary-600"
+    >
+      {children}
     </HeadlessMenuItem>
   );
 }

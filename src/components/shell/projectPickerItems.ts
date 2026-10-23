@@ -12,7 +12,7 @@ export function projectPickerTarget(projectId: string, currentPath: string) {
   let section = "w";
   let sameSection = false;
   if (parts[0] === "projects" && parts.length >= 3) {
-    const s = parts[2];
+    const s = parts[2]!;
     if (s === "runs" || s === "dataclips") section = "history";
     else if (["w", "history", "channels", "sandboxes", "settings", "jobs"].includes(s)) {
       section = s;
@@ -74,9 +74,9 @@ export function filterPickerItems(items: PickerItem[], term: string): PickerItem
     // The parent is the most recent item with a strictly smaller depth.
     let depth = item.depth;
     for (let j = i - 1; j >= 0 && depth > 0; j--) {
-      if (items[j].depth < depth) {
+      if (items[j]!.depth < depth) {
         include[j] = true;
-        depth = items[j].depth;
+        depth = items[j]!.depth;
       }
     }
   });

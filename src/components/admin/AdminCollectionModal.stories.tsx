@@ -6,7 +6,7 @@ import { collections } from "../../mock-data/project-settings";
 const meta: Meta<typeof AdminCollectionModal> = {
   title: "Admin/AdminCollectionModal",
   component: AdminCollectionModal,
-  args: { projectOptions: collectionProjectOptions, onCancel: () => {}, onSave: () => {} },
+  args: { projectOptions: collectionProjectOptions, onCancel: () => {}, onSave: () => Promise.resolve() },
 };
 export default meta;
 type Story = StoryObj<typeof AdminCollectionModal>;

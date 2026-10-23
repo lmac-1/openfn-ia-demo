@@ -19,41 +19,41 @@ export const NewCredential: Story = {
   render: () => <CredentialFormModal open onClose={noop} oauthClients={oauthClients} />,
 };
 export const EditCredential: Story = {
-  render: () => <CredentialFormModal open onClose={noop} credential={credentials[1]} oauthClients={oauthClients} />,
+  render: () => <CredentialFormModal open onClose={noop} credential={credentials[1]!} oauthClients={oauthClients} />,
 };
 export const EditOauthCredential: Story = {
-  render: () => <CredentialFormModal open onClose={noop} credential={credentials[2]} oauthClients={oauthClients} />,
+  render: () => <CredentialFormModal open onClose={noop} credential={credentials[2]!} oauthClients={oauthClients} />,
 };
 export const NewOauthClient: Story = {
   render: () => <OauthClientFormModal open onClose={noop} allowGlobal />,
 };
 export const EditOauthClient: Story = {
-  render: () => <OauthClientFormModal open onClose={noop} client={oauthClients[0]} allowGlobal />,
+  render: () => <OauthClientFormModal open onClose={noop} client={oauthClients[0]!} allowGlobal />,
 };
 export const NewKeychainCredential: Story = {
-  render: () => <KeychainCredentialFormModal open onClose={noop} projectId={projects[0].id} credentials={credentials} />,
+  render: () => <KeychainCredentialFormModal open onClose={noop} projectId={projects[0]!.id} credentials={credentials} />,
 };
 export const EditKeychainCredential: Story = {
   render: () => (
-    <KeychainCredentialFormModal open onClose={noop} projectId={projects[0].id} keychainCredential={keychainCredentials[0]} credentials={credentials} />
+    <KeychainCredentialFormModal open onClose={noop} projectId={projects[0]!.id} keychainCredential={keychainCredentials[0]!} credentials={credentials} />
   ),
 };
 export const TransferCredential: Story = {
-  render: () => <TransferCredentialModal open onClose={noop} credential={credentials[0]} />,
+  render: () => <TransferCredentialModal open onClose={noop} credential={credentials[0]!} />,
 };
 export const RevokeTransfer: Story = {
-  render: () => <TransferCredentialModal open onClose={noop} credential={credentials[2]} />,
+  render: () => <TransferCredentialModal open onClose={noop} credential={credentials[2]!} />,
 };
 export const DeleteCredential: Story = {
-  render: () => <CredentialDeletionModal open onClose={noop} credential={credentials[0]} hasActivityInProjects />,
+  render: () => <CredentialDeletionModal open onClose={noop} credential={credentials[0]!} hasActivityInProjects />,
 };
 export const CredentialMarkedForDeletion: Story = {
-  render: () => <CredentialDeletionModal open onClose={noop} credential={credentials[4]} hasActivityInProjects />,
+  render: () => <CredentialDeletionModal open onClose={noop} credential={credentials[4]!} hasActivityInProjects />,
 };
 export const DeleteOauthClient: Story = {
   render: () => (
     <ConfirmModal open onClose={noop} onConfirm={noop} title="Delete Oauth Client" tone="danger" confirmLabel="Delete">
-      <p>{deleteOauthClientMessage(oauthClients[0].name)}</p>
+      <p>{deleteOauthClientMessage(oauthClients[0]!.name)}</p>
       <p>Do you want to proceed with this action?</p>
     </ConfirmModal>
   ),
@@ -61,7 +61,7 @@ export const DeleteOauthClient: Story = {
 export const DeleteKeychainCredential: Story = {
   render: () => (
     <ConfirmModal open onClose={noop} onConfirm={noop} title="Delete Keychain Credential" tone="danger" confirmLabel="Delete">
-      <p>{deleteKeychainMessage(keychainCredentials[0].name)}</p>
+      <p>{deleteKeychainMessage(keychainCredentials[0]!.name)}</p>
       <p>Do you want to proceed with this action?</p>
     </ConfirmModal>
   ),

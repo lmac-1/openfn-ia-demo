@@ -8,7 +8,7 @@ const meta: Meta<typeof WorkflowsTable> = {
   title: "Projects/WorkflowsTable",
   component: WorkflowsTable,
   decorators: [withRouter],
-  args: { projectId: projects[0].id, stats: workflowStatsFor(projects[0].id) },
+  args: { projectId: projects[0]!.id, stats: workflowStatsFor(projects[0]!.id), sort: { key: "name", direction: "asc" } },
 };
 export default meta;
 type Story = StoryObj<typeof WorkflowsTable>;

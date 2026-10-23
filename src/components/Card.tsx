@@ -22,11 +22,11 @@ interface Props extends Omit<HTMLAttributes<HTMLElement>, "title"> {
   /** Dashed outline, for drop zones and placeholders. */
   dashed?: boolean;
   /** `button` makes the whole card one click target (option tiles, list choices). */
-  as?: "div" | "section" | "li" | "article" | "button";
+  as?: "div" | "section" | "ul" | "li" | "article" | "button";
   /** Inventory id for the annotations panel (`data-annotation`). */
   annotation?: string;
-  id?: string;
-  className?: string;
+  id?: string | undefined;
+  className?: string | undefined;
   children?: ReactNode;
 }
 

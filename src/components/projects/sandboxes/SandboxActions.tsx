@@ -16,10 +16,10 @@ export default function SandboxActions({
   onRestore,
 }: {
   sandbox: SandboxRow;
-  onMerge?: () => void;
-  onEdit?: () => void;
-  onDelete?: () => void;
-  onRestore?: () => void;
+  onMerge?: (() => void) | undefined;
+  onEdit?: (() => void) | undefined;
+  onDelete?: (() => void) | undefined;
+  onRestore?: (() => void) | undefined;
 }) {
   if (sandbox.scheduledDeletion) {
     return (

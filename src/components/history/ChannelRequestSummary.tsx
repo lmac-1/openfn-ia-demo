@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { Channel, ChannelEvent, ChannelRequest } from "../../types/channels";
+import type { ChannelEvent, ChannelRequestChannel, ChannelRequestDetail } from "../../types/channels";
 import Card from "../Card";
 import DateTime from "../DateTime";
 import { DetailItem, DetailList } from "../DetailList";
@@ -32,9 +32,9 @@ export default function ChannelRequestSummary({
   event,
   channel,
 }: {
-  request: ChannelRequest;
+  request: ChannelRequestDetail;
   event: ChannelEvent | undefined;
-  channel: Channel;
+  channel: ChannelRequestChannel;
 }) {
   return (
     <Card padding="lg">

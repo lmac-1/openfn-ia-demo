@@ -1,4 +1,3 @@
-import { useParams } from "react-router-dom";
 import Disclosure from "../../components/Disclosure";
 import { DetailItem, DetailList } from "../../components/DetailList";
 import Header from "../../components/Header";
@@ -16,61 +15,68 @@ import ChannelRequestSummary from "../../components/history/ChannelRequestSummar
 import ChannelTiming from "../../components/history/ChannelTiming";
 import WipedDataViewer from "../../components/history/WipedDataViewer";
 import { errorCategory, humanizeError } from "../../components/history/channelHelpers";
-import { findChannel } from "../../mock-data/channels";
-import { findChannelRequest } from "../../mock-data/channel-requests";
-import { primaryEvent } from "../../utils/history";
-import { findProject } from "../../mock-data/projects";
+import type { ChannelRequestChannel, ChannelRequestDetail } from "../../types/channels";
+import type { CurrentProject } from "../../types/projects";
 import { shortUuid } from "../../utils/format";
-import { usePermissions } from "../../session/session";
+import { primaryEvent } from "../../utils/history";
 
 const sizeNote = (size: number | null) => (size ? <SectionSizeBadge size={size} /> : null);
 
-/** Inventory view `channel-request-show` (ChannelRequestLive.Show, channel_request_live/show.ex). */
-export default function ChannelRequestShowPage() {
-  const { projectId = "", requestId } = useParams();
-  const project = findProject(projectId);
-  const { canEditDataRetention } = usePermissions(project);
-  const request = findChannelRequest(requestId);
-  const channel = request && findChannel(request.channelId);
-  const event = request && primaryEvent(request);
+/** The contract between this page and whatever feeds it (the replica wrapper, later Lightning). */
+export interface ChannelRequestShowPageProps {
+  project: CurrentProject;
+  /** The picker's label, "parent/child" for a sandbox. */
+  projectLabel: string;
+  /** The request, with its primary event; the host has already checked it belongs to the project. */
+  request: ChannelRequestDetail;
+  /** The channel as it is now (the Context section shows the snapshot it ran on). */
+  channel: ChannelRequestChannel;
+  canEditDataRetention: boolean;
+  /** Admin and owner emails, shown to viewers who can't change the retention policy when the data was wiped. */
+  adminContacts: string[];
+}
+
+/**
+ * Inventory view `channel-request-show` (ChannelRequestLive.Show): what one
+ * request through a channel sent and got back, how long it took, and the
+ * config it ran on. Props only, so it can run unchanged in Lightning; the
+ * replica's data and routing live in ChannelRequestShowPage.replica.tsx.
+ */
+export default function ChannelRequestShowPage({
+  project,
+  projectLabel,
+  request,
+  channel,
+  canEditDataRetention,
+  adminContacts,
+}: ChannelRequestShowPageProps) {
+  const event = primaryEvent(request);
   const errorCat = event?.errorMessage ? errorCategory(event.errorMessage) : null;
-
-  const header = (
-    <Header
-      breadcrumbs={
-        project && (
-          <ProjectBreadcrumbs
-            project={project}
-            items={[
-              ["History", `/projects/${projectId}/history`],
-              ["Channels", `/projects/${projectId}/history/channels`],
-            ]}
-            current={
-              <>
-                Channel Request
-                <span className="pl-1 font-light font-mono">{request && shortUuid(request.requestId)}</span>
-              </>
-            }
-          />
-        )
-      }
-    />
-  );
-
-  if (!request || !channel) {
-    return (
-      <PageContent header={header}>
-        <Centered>
-          <p className="text-sm text-gray-500">Channel request not found.</p>
-        </Centered>
-      </PageContent>
-    );
-  }
-
   const configChanged = request.snapshot.lockVersion !== channel.lockVersion;
   const showRequestBody = event && !(event.requestBodyPreview == null && event.requestBodySize == null);
   const showResponseBody =
     event && errorCat === null && !(event.responseBodyPreview == null && event.responseBodySize == null);
+
+  const header = (
+    <Header
+      breadcrumbs={
+        <ProjectBreadcrumbs
+          project={project}
+          label={projectLabel}
+          items={[
+            ["History", `/projects/${project.id}/history`],
+            ["Channels", `/projects/${project.id}/history/channels`],
+          ]}
+          current={
+            <>
+              Channel Request
+              <span className="pl-1 font-light font-mono">{shortUuid(request.id)}</span>
+            </>
+          }
+        />
+      }
+    />
+  );
 
   return (
     <PageContent header={header}>
@@ -83,8 +89,9 @@ export default function ChannelRequestShowPage() {
           {request.isWiped ? (
             <WipedDataViewer
               dataLabel="request_response"
-              projectId={projectId}
+              projectId={project.id}
               canEditDataRetention={canEditDataRetention}
+              adminContacts={adminContacts}
             />
           ) : (
             <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">

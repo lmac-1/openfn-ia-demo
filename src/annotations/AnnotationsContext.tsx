@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
-import { useLocation } from "react-router-dom";
+import { useRouter } from "../routing/router";
 import { AnnotationsContext, type AnnotationsState } from "./annotations-context";
 import { viewIdForLocation } from "./viewIds";
 
@@ -20,7 +20,7 @@ function readOpen() {
  * freezes the selection so you can read without the mouse moving it.
  */
 export function AnnotationsProvider({ children }: { children: ReactNode }) {
-  const location = useLocation();
+  const location = useRouter().useLocation();
   const [open, setOpenState] = useState(readOpen);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [pinnedId, setPinnedId] = useState<string | null>(null);

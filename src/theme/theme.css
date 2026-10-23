@@ -296,7 +296,7 @@ html[data-theme="light"] {
 
   /* ---- Focus ------------------------------------------------- */
 
-  :is(a, button, [role="tab"]):focus-visible {
+  :is(a, button, [role="tab"], [role="radio"]):focus-visible {
     outline: none;
     box-shadow: var(--ui-halo);
   }
@@ -721,12 +721,15 @@ html[data-theme="gds"] {
     }
   }
   /* Pill (a segmented switch, which GOV.UK doesn't have): the same
-     language. Options are links; the chosen one is bold black. */
-  [data-ui="tabs"][data-variant="pill"] [role="tab"] {
+     language. Options are links; the chosen one is bold black. A
+     segmented control is the same switch as a radio group. */
+  [data-ui="tabs"][data-variant="pill"] [role="tab"],
+  [data-ui="segmented-control"] [role="radio"] {
     color: var(--ui-link);
     text-decoration: underline;
     text-underline-offset: 0.15em;
-    &[aria-selected="true"] { color: var(--ui-text); font-weight: 700; text-decoration: none; }
+    &[aria-selected="true"],
+    &[aria-checked="true"] { color: var(--ui-text); font-weight: 700; text-decoration: none; }
   }
 
   /* Side menu: a white column ruled off from the page, in the style of

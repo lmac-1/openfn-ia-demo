@@ -1,41 +1,43 @@
-import { useState } from "react";
 import Alert from "../Alert";
 import Button from "../Button";
 import { TextArea, TextInput } from "../Inputs";
 import SectionHeader from "../SectionHeader";
 import NameField from "../NameField";
 import TextLink from "../TextLink";
-import { useToast } from "../Toast";
 import Toggle from "../Toggle";
 import SandboxSettingsBanner from "./SandboxSettingsBanner";
 import Card from "../Card";
 import type { Project } from "../../types/projects";
+import { errorMessage } from "../../utils/errors";
 import { urlSafeName } from "../../utils/format";
+import { useForm } from "../../utils/useForm";
+import { blank } from "../../utils/validate";
 
 interface Props {
   project: Project;
   /** Project environment, shown read-only. */
   env: string;
   /** The parent, when `project` is a sandbox. */
-  parentProject?: Project;
+  parentProject?: Project | undefined;
   canEditProject: boolean;
   canDeleteProject: boolean;
+  /** Saves the identity or concurrency form. Rejects on failure, which the form shows inline. */
+  onUpdate: (changes: Partial<Pick<Project, "name" | "description" | "concurrency">>) => Promise<void>;
 }
 
 /**
  * The Setup tab (`#project`, settings.html.heex:67-313): Project Identity
- * form, Concurrency Override, Export, and the danger zone. Saving only
- * updates local state.
+ * form, Concurrency Override, Export, and the danger zone. As in Lightning,
+ * Identity's Save is enabled whenever the user can edit; Concurrency's waits
+ * for a change.
  */
-export default function ProjectSetupPanel({ project, env, parentProject, canEditProject, canDeleteProject }: Props) {
+export default function ProjectSetupPanel({ project, env, parentProject, canEditProject, canDeleteProject, onUpdate }: Props) {
   const sandbox = project.parentId !== null;
-  const [rawName, setRawName] = useState(project.name);
-  const [description, setDescription] = useState(project.description);
-  const [savedSerial, setSavedSerial] = useState(project.concurrency === 1);
-  const [serial, setSerial] = useState(project.concurrency === 1);
-  const toast = useToast();
-  const name = urlSafeName(rawName);
-  const concurrencyChanged = serial !== savedSerial;
+  const identity = useForm({
+    initial: { rawName: project.name, description: project.description },
+    validate: ({ rawName }) => ({ rawName: blank(urlSafeName(rawName)) }),
+  });
+  const concurrency = useForm({ initial: { serial: project.concurrency === 1 } });
 
   return (
     <>
@@ -67,18 +69,13 @@ export default function ProjectSetupPanel({ project, env, parentProject, canEdit
         <form
           id="project-settings-form"
           className="space-y-4"
-          onSubmit={(e) => {
-            e.preventDefault();
-            toast("Project updated successfully");
-          }}
+          onSubmit={identity.submit(({ rawName, description }) => onUpdate({ name: urlSafeName(rawName), description }))}
         >
           <NameField
             id="project-settings-form_raw_name"
             label="Project name"
-            value={rawName}
             disabled={!canEditProject}
-            onChange={(raw) => setRawName(raw)}
-            errors={name ? [] : ["can't be blank"]}
+            {...identity.fieldProps("rawName")}
             badgeLabel="Your project will be named"
           />
           <TextInput
@@ -93,12 +90,17 @@ export default function ProjectSetupPanel({ project, env, parentProject, canEdit
             id="project-settings-form_description"
             label="Project description"
             hint="A short description of a project (max 240 characters)"
-            value={description}
             disabled={!canEditProject}
             maxLength={240}
-            onChange={(e) => setDescription(e.target.value)}
+            {...identity.fieldProps("description")}
           />
-          <Button id="project-identity-submit-btn" type="submit" disabled={!(name && canEditProject)}>
+          {identity.error && <Alert type="danger">{errorMessage(identity.error)}</Alert>}
+          <Button
+            id="project-identity-submit-btn"
+            type="submit"
+            disabled={!canEditProject}
+            pending={identity.pending}
+          >
             Save
           </Button>
         </form>
@@ -120,26 +122,28 @@ export default function ProjectSetupPanel({ project, env, parentProject, canEdit
         <form
           id="project-concurrency-form"
           className="space-y-4"
-          onSubmit={(e) => {
-            e.preventDefault();
-            setSavedSerial(serial);
-            toast("Project updated successfully");
-          }}
+          onSubmit={concurrency.submit(({ serial }) => onUpdate({ concurrency: serial ? 1 : null }))}
         >
           <Toggle
             id="project-concurrency-switch"
-            checked={serial}
-            onChange={setSerial}
+            checked={concurrency.values.serial}
+            onChange={(serial) => concurrency.set("serial", serial)}
             disabled={!canEditProject}
             label="Disable parallel execution"
             note="(No more than one run at a time)"
           />
-          {serial && concurrencyChanged && (
+          {concurrency.values.serial && concurrency.dirty && (
             <Alert type="warning" header="Heads Up!">
               <p>Disabling parallel run execution may significantly reduce the overall throughput of your project.</p>
             </Alert>
           )}
-          <Button id="project-concurrency-submit-btn" type="submit" disabled={!(concurrencyChanged && canEditProject)}>
+          {concurrency.error && <Alert type="danger">{errorMessage(concurrency.error)}</Alert>}
+          <Button
+            id="project-concurrency-submit-btn"
+            type="submit"
+            disabled={!(concurrency.dirty && canEditProject)}
+            pending={concurrency.pending}
+          >
             Save
           </Button>
         </form>

@@ -92,6 +92,7 @@ export default function ManualRunPanel({
               <span className="hero-cloud-arrow-up size-8 text-gray-300" />
               <p className="mt-2">
                 <label className="link font-semibold">
+                  {/* eslint-disable-next-line no-restricted-syntax -- hidden file input; the label around it is the control */}
                   <input
                     type="file"
                     accept=".json"
@@ -119,7 +120,7 @@ export default function ManualRunPanel({
                 <FieldError>{parseError}</FieldError>
               </div>
             )}
-            <CodeEditor value={body} onChange={setBody} ariaLabel="Custom input" />
+            <CodeEditor value={body} onChange={setBody} language="json" ariaLabel="Custom input" />
           </div>
         </div>
       )}
@@ -181,7 +182,7 @@ export default function ManualRunPanel({
         <IconButton icon="hero-x-mark" label="Unselect dataclip" onClick={() => setSelected(null)} />
       </div>
       <div className="min-h-64 flex-1">
-        <CodeEditor value={JSON.stringify(selected.body, null, 2)} readOnly ariaLabel="Dataclip body" />
+        <CodeEditor value={JSON.stringify(selected.body, null, 2)} language="json" readOnly ariaLabel="Dataclip body" />
       </div>
     </div>
   );

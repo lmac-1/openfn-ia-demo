@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
-import type { Dataclip } from "../../types/history";
-import { uuidOf } from "../../utils/format";
+import type { DataclipDetail } from "../../types/history";
 import Card from "../Card";
 import DateTime from "../DateTime";
 import { DetailItem, DetailList } from "../DetailList";
@@ -8,12 +7,12 @@ import { EmptyState } from "../Table";
 import DataclipTypePill from "./DataclipTypePill";
 
 /** The "Dataclip Details" metadata card (dataclip_live/show.ex). */
-export default function DataclipDetailsCard({ dataclip, updatedAt }: { dataclip: Dataclip; updatedAt?: string }) {
+export default function DataclipDetailsCard({ dataclip }: { dataclip: DataclipDetail }) {
   return (
     <Card title="Dataclip Details" padding="lg" className="mb-6">
       <DetailList layout="grid">
         <DetailItem label="ID" mono>
-          {uuidOf(dataclip.id)}
+          {dataclip.id}
         </DetailItem>
         <DetailItem label="Type">
           <DataclipTypePill type={dataclip.type} />
@@ -22,11 +21,11 @@ export default function DataclipDetailsCard({ dataclip, updatedAt }: { dataclip:
           <DateTime value={dataclip.insertedAt} />
         </DetailItem>
         <DetailItem label="Updated">
-          <DateTime value={updatedAt ?? dataclip.insertedAt} />
+          <DateTime value={dataclip.updatedAt} />
         </DetailItem>
-        {dataclip.wiped && (
+        {dataclip.wipedAt && (
           <DetailItem label="Wiped">
-            <DateTime value={updatedAt ?? dataclip.insertedAt} />
+            <DateTime value={dataclip.wipedAt} />
           </DetailItem>
         )}
       </DetailList>
@@ -35,10 +34,10 @@ export default function DataclipDetailsCard({ dataclip, updatedAt }: { dataclip:
 }
 
 /** The dataclip page's body card: the JSON viewer, or "No Data Available". */
-export function DataclipBodyCard({ dataclip, children }: { dataclip: Dataclip; children?: ReactNode }) {
+export function DataclipBodyCard({ wiped, children }: { wiped: boolean; children?: ReactNode }) {
   return (
     <Card padding="none" className="h-96 overflow-hidden">
-      {dataclip.wiped ? (
+      {wiped ? (
         <div className="flex h-full items-center">
           <EmptyState
             variant="plain"

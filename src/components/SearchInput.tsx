@@ -7,20 +7,22 @@ interface Props extends Omit<InputHTMLAttributes<HTMLInputElement>, "value" | "o
   value: string;
   onChange: (value: string) => void;
   /** Called after the clear button empties the box. */
-  onClear?: () => void;
+  onClear?: (() => void) | undefined;
   /** Accessible name; defaults to the placeholder. */
   label?: string;
   /** `sm` for compact panels and pickers. */
   size?: "sm" | "md";
   /** Render the text box as another component, e.g. Headless UI's `ComboboxInput` (SearchList). */
   inputAs?: ElementType;
+  /** id of the clear button, for hosts that address it. */
+  clearButtonId?: string | undefined;
 }
 
 /**
  * A text field with a magnifying glass and, once it has text, a clear
  * button. Full width: set the width (and any margin) with `className`.
  */
-export default function SearchInput({ value, onChange, onClear, label, placeholder = "Search", size = "md", inputAs: Input = "input", className, ...rest }: Props) {
+export default function SearchInput({ value, onChange, onClear, label, placeholder = "Search", size = "md", inputAs: Input = "input", clearButtonId, className, ...rest }: Props) {
   const sm = size === "sm";
   return (
     <div className={cn("relative", className)}>
@@ -43,6 +45,7 @@ export default function SearchInput({ value, onChange, onClear, label, placehold
       />
       {value !== "" && (
         <IconButton
+          id={clearButtonId}
           icon="hero-x-mark"
           label="Clear search"
           size="sm"

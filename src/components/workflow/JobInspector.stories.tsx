@@ -11,7 +11,7 @@ const meta: Meta<typeof JobInspector> = {
   component: JobInspector,
   decorators: [withSidePanel()],
   args: {
-    job: graph.jobs[0],
+    job: graph.jobs[0]!,
     projectId: graph.projectId,
     adaptorsInUse: ["http"],
     onChange: noop,
@@ -25,6 +25,6 @@ export default meta;
 type Story = StoryObj<typeof JobInspector>;
 
 export const Http: Story = {};
-export const WithCredential: Story = { args: { job: findWorkflowGraph("wf-dhis2-sheets")!.jobs[0] } };
-export const NeedsCredential: Story = { args: { job: findWorkflowGraph("wf-dhis2-sheets")!.jobs[1] } };
+export const WithCredential: Story = { args: { job: findWorkflowGraph("wf-dhis2-sheets")!.jobs[0]! } };
+export const NeedsCredential: Story = { args: { job: findWorkflowGraph("wf-dhis2-sheets")!.jobs[1]! } };
 export const CannotDelete: Story = { args: { canDelete: false } };

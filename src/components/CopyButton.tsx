@@ -1,13 +1,13 @@
 import type { ReactNode } from "react";
-import { cn } from "../utils/cn";
 import { useCopy } from "../utils/useCopy";
 import Button, { type ButtonSize } from "./Button";
 import IconButton from "./IconButton";
+import Tooltip from "./Tooltip";
 
 /**
- * Copies `value` to the clipboard and says so for two seconds. With
- * children it's a secondary Button ("Copy Code" → "Copied!"); without, a
- * clipboard IconButton that turns into a green check.
+ * Copies `value` to the clipboard and says so. With children it's a
+ * secondary Button ("Copy Code" → "Copied!" for two seconds); without, a
+ * clipboard IconButton whose tooltip says "Copied!".
  */
 export default function CopyButton({
   value,
@@ -35,14 +35,10 @@ export default function CopyButton({
       </Button>
     );
   }
+  // The icon button says "Copied!" in its tooltip, as Lightning's Copy hook does.
   return (
-    <IconButton
-      id={id}
-      icon={copied ? "hero-check" : "hero-clipboard-document"}
-      label={copied ? "Copied!" : label}
-      size={size === "xs" ? "sm" : size}
-      onClick={copy}
-      className={cn(copied && "text-success-600 hover:text-success-600", className)}
-    />
+    <Tooltip content={label} copy={value}>
+      <IconButton id={id} icon="hero-clipboard-document" label={label} title="" size={size === "xs" ? "sm" : size} className={className} />
+    </Tooltip>
   );
 }

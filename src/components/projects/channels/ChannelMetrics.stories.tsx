@@ -7,7 +7,7 @@ const meta: Meta<typeof ChannelMetrics> = {
   title: "Projects/Channels/ChannelMetrics",
   component: ChannelMetrics,
   decorators: [withRouter],
-  args: { totalChannels: 2, totalRequests: 3421, projectId: projects[0].id },
+  args: { totalChannels: 2, totalRequests: 3421, logsHref: `/projects/${projects[0]!.id}/history/channels` },
 };
 export default meta;
 type Story = StoryObj<typeof ChannelMetrics>;

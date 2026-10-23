@@ -2,11 +2,12 @@ import ConfirmModal from "../ConfirmModal";
 import type { Project } from "../../types/projects";
 
 interface Props {
-  project: Project;
+  project: Pick<Project, "name">;
   /** Days until the project is purged; 0 means "today". */
   gracePeriodDays: number;
   onCancel: () => void;
-  onDelete: () => void;
+  /** Called with the typed name once it matches. May be async: the modal shows pending and stays open with the error if it rejects. */
+  onDelete: (nameConfirmation: string) => void | Promise<void>;
 }
 
 /**

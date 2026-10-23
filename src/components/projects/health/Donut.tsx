@@ -1,4 +1,5 @@
 import { formatNumber } from "../../../utils/format";
+import { Link } from "../../../routing/router";
 import TextLink from "../../TextLink";
 import { DOT, EMPTY, FRAME, LEGEND, percent } from "./palette";
 
@@ -34,7 +35,8 @@ const arc = (from: number, to: number) => {
 /**
  * A part-to-whole ring with a headline figure in the middle and an always-on
  * legend (assets/js/health/charts/Donut.tsx). Drawn as plain SVG here in place
- * of Recharts; hovering a wedge shows its count and share.
+ * of Recharts; hovering a wedge shows its count and share. A wedge and its
+ * legend row open the work orders it counts.
  */
 export default function Donut({
   slices,
@@ -49,6 +51,7 @@ export default function Donut({
   if (total === 0) return <p className={EMPTY}>{emptyMessage}</p>;
 
   const drawn = slices.filter((s) => s.value > 0);
+  const only = drawn.length === 1 ? drawn[0] : undefined;
   let angle = 0;
   const middle = centre(total);
 
@@ -56,18 +59,22 @@ export default function Donut({
     <div className="mx-auto w-full max-w-sm">
       <div className={`${FRAME} relative`}>
         <svg viewBox={`0 0 ${SIZE} ${SIZE}`} className="h-full w-full" aria-hidden="true">
-          {drawn.length === 1 ? (
-            <circle cx={C} cy={C} r={(OUTER + INNER) / 2} fill="none" stroke={drawn[0].color} strokeWidth={OUTER - INNER}>
-              <title>{`${drawn[0].label}: ${formatNumber(drawn[0].value)} (${percent(drawn[0].value, total)})`}</title>
-            </circle>
+          {only ? (
+            <Link to={only.href} tabIndex={-1}>
+              <circle cx={C} cy={C} r={(OUTER + INNER) / 2} fill="none" stroke={only.color} strokeWidth={OUTER - INNER} className="cursor-pointer">
+                <title>{`${only.label}: ${formatNumber(only.value)} (${percent(only.value, total)})`}</title>
+              </circle>
+            </Link>
           ) : (
             drawn.map((s) => {
               const from = angle;
               angle += (s.value / total) * 360;
               return (
-                <path key={s.key} d={arc(from, angle)} fill={s.color} stroke="#fff" strokeWidth={2} >
-                  <title>{`${s.label}: ${formatNumber(s.value)} (${percent(s.value, total)})`}</title>
-                </path>
+                <Link key={s.key} to={s.href} tabIndex={-1}>
+                  <path d={arc(from, angle)} fill={s.color} stroke="#fff" strokeWidth={2} className="cursor-pointer">
+                    <title>{`${s.label}: ${formatNumber(s.value)} (${percent(s.value, total)})`}</title>
+                  </path>
+                </Link>
               );
             })
           )}
@@ -83,7 +90,8 @@ export default function Donut({
             <TextLink to={href} variant="plain" className="flex items-center gap-1.5">
               <span aria-hidden="true" className={DOT} style={{ backgroundColor: color }} />
               <span className="capitalize">{label}</span>{" "}
-              <span className="font-medium tabular-nums text-gray-900">{formatNumber(value)}</span>
+              <span className="font-medium tabular-nums text-gray-900">{formatNumber(value)}</span>{" "}
+              <span className="sr-only">({percent(value, total)})</span>
             </TextLink>
           </li>
         ))}

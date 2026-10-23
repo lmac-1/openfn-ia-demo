@@ -19,7 +19,8 @@ import { findDataclip, workOrdersIn } from "../../mock-data/history";
 import type { SearchFieldId, WorkOrder } from "../../types/history";
 import { historyChannelsEnabled, historyWorkOrder, logsOf, runsOfWorkOrder, workflowJobs } from "../../mock-data/history-extra";
 import { historySearchFields, historyStatuses } from "../../constants";
-import { findProject } from "../../mock-data/projects";
+import { findProject, projects } from "../../mock-data/projects";
+import { projectLabel } from "../../components/shell/projectPickerItems";
 import { workflowsIn } from "../../mock-data/workflows";
 import { usePermissions } from "../../session/session";
 
@@ -116,7 +117,7 @@ export default function HistoryWorkOrdersPage() {
   return (
     <PageContent
       header={
-        <Header breadcrumbs={project && <ProjectBreadcrumbs project={project} current="History" />}>
+        <Header breadcrumbs={project && <ProjectBreadcrumbs project={project} label={projectLabel(project, projects)} current="History" />}>
           {historyChannelsEnabled && (
             <Tabs
               variant="pill"

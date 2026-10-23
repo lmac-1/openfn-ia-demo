@@ -26,6 +26,7 @@ export default function VersionDropdown({ snapshots, pinnedVersion, onVersionSel
         className="w-56 max-h-80 overflow-y-auto"
         panelProps={{ "data-annotation": "workflow-editor-versions-and-promote" }}
         trigger={
+          // eslint-disable-next-line no-restricted-syntax -- debt: a Pill-styled menu trigger; Pill isn't a button
           <button
             type="button"
             className={cn(

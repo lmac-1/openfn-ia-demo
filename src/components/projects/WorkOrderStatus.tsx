@@ -4,6 +4,7 @@ import DateTime from "../DateTime";
 import { capitalize } from "../../utils/format";
 
 const DOT: Record<WorkOrderDisplayState, string> = {
+  rejected: "bg-gray-300",
   pending: "bg-gray-600",
   running: "bg-blue-600",
   success: "bg-green-600",
@@ -16,6 +17,7 @@ const DOT: Record<WorkOrderDisplayState, string> = {
 };
 
 const TEXT: Record<WorkOrderDisplayState, string> = {
+  rejected: "text-gray-600",
   pending: "text-gray-500",
   running: "text-blue-500",
   success: "text-green-500",
@@ -40,7 +42,7 @@ export default function WorkOrderStatus({
   period = "last 30 days",
 }: {
   state: WorkOrderDisplayState | null;
-  updatedAt?: string;
+  updatedAt?: string | undefined;
   period?: string;
 }) {
   if (!state) {

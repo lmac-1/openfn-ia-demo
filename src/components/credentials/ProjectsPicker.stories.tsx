@@ -14,6 +14,6 @@ function Stateful({ initial, type }: { initial: string[]; type: "credential" | "
 
 export const Empty: Story = { render: () => <Stateful initial={[]} type="credential" /> };
 export const WithProjects: Story = {
-  render: () => <Stateful initial={[projects[0].id, projects[1].id]} type="credential" />,
+  render: () => <Stateful initial={[projects[0]!.id, projects[1]!.id]} type="credential" />,
 };
 export const OauthClient: Story = { render: () => <Stateful initial={[]} type="oauth_client" /> };

@@ -31,8 +31,8 @@ export default function FilterChip({
   children: ReactNode;
 }) {
   const clearable = active && onClear;
-  // The chip's label is its own trigger surface, so it stays a bare button.
   const label = (
+    // eslint-disable-next-line no-restricted-syntax -- the chip's label is its own trigger surface, styled by the chip
     <button type="button" className={cn("py-1.5 pl-3", clearable ? "pr-0" : "pr-3")}>
       {children}
     </button>

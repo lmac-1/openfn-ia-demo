@@ -21,13 +21,13 @@ export function useWorkflowEditorState(initial: WorkflowGraph) {
     setState((s) =>
       s.past.length === 0
         ? s
-        : { ...s, graph: s.past[s.past.length - 1], past: s.past.slice(0, -1), future: [s.graph, ...s.future] }
+        : { ...s, graph: s.past[s.past.length - 1]!, past: s.past.slice(0, -1), future: [s.graph, ...s.future] }
     );
   }, []);
 
   const redo = useCallback(() => {
     setState((s) =>
-      s.future.length === 0 ? s : { ...s, graph: s.future[0], past: [...s.past, s.graph], future: s.future.slice(1) }
+      s.future.length === 0 ? s : { ...s, graph: s.future[0]!, past: [...s.past, s.graph], future: s.future.slice(1) }
     );
   }, []);
 

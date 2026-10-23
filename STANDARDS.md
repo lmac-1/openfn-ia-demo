@@ -11,7 +11,7 @@ Status of each pattern, as of this commit:
 | # | Pattern | Status | Where |
 |---|---------|--------|-------|
 | 1 | Async action | **Done** | `useAction`, `Button pending`, `FormModal`, `ConfirmModal`, `Spinner` |
-| 2 | Form with server errors | Partly: `RequestError.fieldErrors`, `FormModal onFieldErrors` | needs `useForm` |
+| 2 | Form with server errors | **Done** | `useForm` (`submit`, `modalSubmit`); render-time validation remains in 3 files (see below) |
 | 3 | Server-driven list | Todo | History first |
 | 4 | Data down, mutations up | Convention; 5 panels break it | see list below |
 | 5 | Resource loading states | Todo | needs `AsyncBoundary`, 404, error page |
@@ -20,8 +20,10 @@ Status of each pattern, as of this commit:
 | 8 | Live updates | Todo, after 3 | subscription hook |
 | 9 | Permission gating | Mostly done | one disabled-with-reason look |
 | 10 | Session and route guards | Todo | router-level guard |
+| 11 | Page and wrapper | 19 pages and the Sidebar | History work orders, Sandboxes, project settings, the workflow editor, profile, credentials, the remaining auth pages |
 
-Worked example: `src/pages/profile/TokensPage.tsx` (patterns 1, 4, 6, 7).
+Worked example: `src/pages/profile/TokensPage.tsx` and its
+`TokensPage.replica.tsx` wrapper (patterns 1, 4, 6, 7, 11).
 
 ## 1. Async action
 
@@ -51,21 +53,46 @@ disclosure, copying to clipboard).
 ## 2. Form with server errors
 
 One form helper owns values, dirty state, client validation and server
-field errors. Not built yet; its contract:
+field errors: `useForm` (`src/utils/useForm.ts`).
 
-- `useForm({ initial, validate })` returns `values`, `set(field, value)`,
-  `errors` (per field, `string[]`, client and server merged), `dirty`,
-  `reset()`, and `fieldProps(name)` to spread onto `TextInput` etc.
+- `useForm({ initial, validate, clearOnSave })` returns `values`,
+  `set(field, value)`, `errors` (per field, `string[]`, client and server
+  merged), `dirty`, `reset()`, and `fieldProps(name)` to spread onto
+  `TextInput`, `NameField` etc. `clearOnSave` empties the form after a
+  successful save (password forms) instead of keeping what was typed.
+- A page form submits with `onSubmit={form.submit(save)}`. It runs `save`
+  through `useAction` (pattern 1), so `form.pending` goes on the Save button
+  and `form.error` shows as an `Alert` by the form (pattern 7). On success
+  the submitted values become the saved ones and the form is clean again.
+  A `FormModal` form passes `onSubmit={form.modalSubmit(save)}` and closes
+  itself inside `save`; the modal shows pending and other failures.
 - Client validation runs on blur and on submit, not on every keystroke.
+  `blank` from `utils/validate.ts` is the required-field check.
 - A `RequestError` with `fieldErrors` from submit lands on the matching
-  fields (`FormModal onFieldErrors` already routes it). Lightning's changeset
-  messages ("can't be blank", "has already been taken") are used verbatim.
-- Save is disabled until `dirty`, on every settings form, matching Lightning.
+  fields. If any key isn't a form field (Lightning's `current_password`
+  where the form says `password`), the submit fails with the error's
+  message, so nothing is lost silently. Lightning's changeset messages
+  ("can't be blank", "has already been taken") are used verbatim.
+- Submit is never disabled because the form is invalid: submitting shows
+  every error and doesn't save, so the user can always find out why.
+  (Lightning disables it, and the reason can sit on a field you haven't
+  touched.)
+- The one exception is type-to-confirm (pattern 6): the confirm button stays
+  disabled until the typed text matches, and the dialog always shows the
+  text to type. The typing is a deliberate pause before something that
+  can't be undone, not data entry, and with the text shown there is no
+  hidden reason.
+- Whether Save waits for changes follows Lightning form by form: Project
+  Identity's doesn't, Concurrency's and basic info's do.
 - Field ids keep Lightning's (`project-settings-form_raw_name`), so the
-  compare tooling and the annotations still line up.
+  compare tooling and the annotations still line up. An input without an
+  `id` gets a generated one, so every label is linked to its control.
 
-Retire the inline `errors={cond ? ["can't be blank"] : []}` computed in
-render once this exists.
+Converted: `CreateProjectModal`, `ProjectSetupPanel`, `ProfileForms`. Still
+computing `errors={cond ? ["can't be blank"] : []}` in render:
+`DataStoragePanel`, `CredentialFormModal`, `AuthResetPasswordPage`. Other
+page forms (`UserForm`, `AdminProjectForm`, `AuthProviderForm`, `MfaCard`,
+the auth pages) move to `useForm` when next touched.
 
 ## 3. Server-driven list
 
@@ -75,15 +102,23 @@ query, not the rows.
 - Query state (filters, sort, page, search) lives in the URL via
   `useUrlParams`, using Lightning's own param names (`filters[workflow_id]`,
   `sort_by`, `page`). Reloading the page reproduces the view.
+- The host sends the result as plain data: the rows, `page: PageInfo` and,
+  for a sorted list, `sort: SortState`. No callbacks for paging or sorting,
+  and no browser fallback when they are missing.
+- The page links to its own query string only (`useUrlParams().href`),
+  never a path, so it knows no routes. A link to another page is an `…Href`
+  prop from the host.
 - The page turns the URL into a query (today: a mock-data function that
   filters fixtures; later: a request) and gets back `{ rows, total, page,
   pageSize }`.
 - `Table` takes rows and a `state: "loading" | "error" | "ready"`, and shows
   the loading and error treatments itself. `EmptyState` stays for "no rows".
-- `Pagination` takes `page`, `total`, `pageSize`, `onPage`. No component
-  hardcodes `pageNumber={1}`.
-- `useTableSort` becomes sort *state* only; nothing sorts rows in the browser
-  except small, fully loaded lists (project members, tabs).
+- `Pagination` takes `page` and links each page to this URL with `?page=`
+  changed, showing five pages either side as Lightning does. No component
+  hardcodes `number: 1`.
+- A server-sorted header is `<Th sortHref>`, a plain link. `onSort` and
+  `useTableSort` are only for small, fully loaded lists (project members,
+  tabs).
 
 Build it on History first (`HistoryWorkOrdersPage`): nine filters move from
 `useState` into the URL, `matchesSearch` and friends move behind one
@@ -119,18 +154,22 @@ needs the same four treatments: loading, not found, forbidden, error.
 
 `ConfirmModal` is the one way to confirm a destructive action. It supports
 type-to-confirm, async `onConfirm` (pattern 1), and stays open on failure.
+Type-to-confirm keeps the confirm button disabled until the text matches,
+and the dialog says what to type ("To confirm, type alice@example.org
+below"). This is the one exception to pattern 2's rule.
 
-Retire: `window.confirm` (`CredentialFormModal`, `ChannelsTable`,
-`WorkflowsTable`), the bespoke `UserDeletionModal` and
-`CredentialDeletionModal` (rebuild on `ConfirmModal` with `confirmation`).
+Retire: `window.confirm` (`CredentialFormModal`, `WorkflowsTable`), the
+bespoke `CredentialDeletionModal` (rebuild on `ConfirmModal` with
+`confirmation`, as `UserDeletionModal` is).
 The `/…/delete` routes stay, because Lightning has them; they open a
 `ConfirmModal`.
 
 ## 7. Feedback
 
-- Success is a toast, fired by the **page** (or the hook that ran the
-  request), never by a feature component. Components report through
-  callbacks; the page decides what to say. Wording is Lightning's flash text.
+- Success is announced by the **host**, never the page: the replica wrapper
+  toasts it, and Lightning shows its own flash (put by the server) as the
+  same toast. Components report through callbacks. Wording is Lightning's
+  flash text.
 - Failure that needs reading (a form rejected, a conflict) is an inline
   `Alert` next to what failed. Failure of a one-shot button is an error
   toast.
@@ -161,6 +200,42 @@ pending, to confirm-required when unconfirmed, to the MFA-required page for
 projects that require it, and away from `/settings/*` for non-superusers.
 Lightning does this in plugs and `on_mount`; mirror those rules in one
 `RouteGuard` component around the route groups in `App.tsx`.
+
+## 11. Page and wrapper
+
+A page that will move to Lightning is two files: the page draws, the wrapper
+feeds it. The page file is copied into Lightning unchanged; only the wrapper
+is rewritten.
+
+- **`XPage.tsx`** takes everything as props: the records, and an `on*`
+  function per action returning `Promise<void>`. It imports nothing from
+  `src/mock-data/`, `src/session/` or `react-router-dom`. Its props type
+  (`XPageProps`, a comment on each prop) is the contract between the two.
+- **`XPage.replica.tsx`** is what `App.tsx` routes to. It holds the fixtures
+  in state as the server would, reads URL params, awaits `simulateRequest`,
+  fires success toasts and navigates. It is the "page" patterns 4 and 7 mean.
+- **In Lightning**, an island wrapper feeds the same `XPage.tsx` from the
+  LiveView's `data-*` attributes and turns each `on*` call into a
+  `pushEvent`. After an action the LiveView re-renders with new attributes,
+  so new props arrive the same way they do in the replica.
+- **Shapes are Lightning's**, not the convenient ones: a token arrives
+  `masked`, and its secret only once, as `newToken`.
+- **The contract is written by hand.** `XPageProps` and the shapes it names
+  never build on the replica's model types (`User`, `Project`, `WorkOrder`);
+  the replica maps fixtures onto them. Every one is exported from `index.ts`,
+  camelCase, and plain JSON apart from the `on*` callbacks.
+- **Names say what a shape is**: `…Row` for a table row, `…Ref` for a
+  pointer to another record, `…Values` for what a form saves, `…Detail` for
+  one record's page, `…Result` for an event's answer. No two exported types
+  share a name.
+- **Required unless the host may not support it.** Data the host always knows
+  is required, `T | null` for none. `?:` hides a feature; it never falls back
+  to a route or wording the design system makes up.
+- **The page keeps UI state only**: which modal is open, a draft not yet
+  saved. Never its own copy of the records.
+- **The page gets a story** with plain props: `withRouter`,
+  `withCanvas("h-screen")` and `layout: "fullscreen"` (`PageContent` fills
+  its parent, so without a height its body is clipped).
 
 ## How to add a pattern to a component
 

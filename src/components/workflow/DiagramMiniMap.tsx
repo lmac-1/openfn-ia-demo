@@ -20,7 +20,6 @@ interface Props {
  * masked grey. Clicking it centres the canvas there.
  */
 export default function DiagramMiniMap({ graph, viewport, canvasSize, onCenter }: Props) {
-  const ids = Object.keys(graph.positions);
   const view: Rect = {
     x: -viewport.x / viewport.zoom,
     y: -viewport.y / viewport.zoom,
@@ -32,8 +31,7 @@ export default function DiagramMiniMap({ graph, viewport, canvasSize, onCenter }
   let minY = view.y;
   let maxX = view.x + view.width;
   let maxY = view.y + view.height;
-  for (const id of ids) {
-    const p = graph.positions[id];
+  for (const p of Object.values(graph.positions)) {
     minX = Math.min(minX, p.x);
     minY = Math.min(minY, p.y);
     maxX = Math.max(maxX, p.x + NODE_BOX);

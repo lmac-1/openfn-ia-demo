@@ -10,7 +10,7 @@ interface Props {
    * parent on merge; inherited: they come from the parent and are read-only.
    */
   variant: Variant;
-  parentProject?: Project;
+  parentProject?: Project | undefined;
 }
 
 const alertTypes: Record<Variant, AlertType> = { local: "info", editable: "success", inherited: "warning" };

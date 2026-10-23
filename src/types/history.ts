@@ -33,9 +33,13 @@ export interface Step {
   runId: string;
   jobId: string;
   jobName: string;
-  exitReason: "success" | "fail" | "crash" | null;
+  exitReason: "success" | "fail" | "crash" | "cancel" | "kill" | "exception" | "lost" | null;
+  /** Why a killed step was killed (SecurityError, TimeoutError, OOMError…); picks the icon. */
+  errorType?: string | null;
   startedAt: string;
   finishedAt: string | null;
+  /** When the step row was written. A step older than its run was cloned from an earlier run. */
+  insertedAt?: string;
   inputDataclipId: string;
   outputDataclipId: string | null;
 }
@@ -67,10 +71,55 @@ export interface WorkOrder {
 
 export interface LogLine {
   timestamp: string;
-  source: "R/T" | "JOB" | "ADA" | "CLI";
-  level: "info" | "debug" | "warn" | "error";
+  /** "R/T", "JOB", "ADA", "CLI"; the worker may add others. */
+  source: string;
+  /** "debug", "info", "warn", "error"; anything else ("success", "always") always shows. */
+  level: string;
   message: string;
-  stepId?: string;
+  stepId?: string | null;
+}
+
+/** The run page's run (RunLive.Show): the detail rows and the version chip. */
+export interface RunDetail {
+  id: string;
+  workOrderId: string;
+  state: RunState;
+  /** The creator's email, or "Webhook trigger" / "Cron trigger"; null when neither is known. */
+  startedBy: string | null;
+  insertedAt: string;
+  startedAt: string | null;
+  finishedAt: string | null;
+  finalDataclipId: string | null;
+  snapshot: { id: string; lockVersion: number; insertedAt: string };
+}
+
+/** The run page's workflow: the link and the version the chip compares against. */
+export interface RunWorkflow {
+  id: string;
+  name: string;
+  lockVersion: number;
+}
+
+/** A step on the run page: its own snapshot version pins the inspect link. */
+export interface RunStep extends Omit<Step, "runId"> {
+  insertedAt: string;
+  snapshotLockVersion: number;
+}
+
+/** The dataclip page's record (DataclipLive.Show): metadata only, the body arrives separately. */
+export interface DataclipDetail {
+  id: string;
+  type: DataclipType;
+  insertedAt: string;
+  updatedAt: string;
+  wipedAt: string | null;
+}
+
+/** A selected step's input or output: the body arrives separately and may still be loading. */
+export interface StepDataclip {
+  id: string;
+  wiped: boolean;
+  body?: unknown;
 }
 
 export type SearchFieldId = "id" | "dataclip_name" | "body" | "log";

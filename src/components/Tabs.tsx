@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
-import { Link, type To } from "react-router-dom";
+import { Link } from "../routing/router";
 import { cn } from "../utils/cn";
+import { tabStyles } from "./tabStyles";
 
 export interface Tab<T extends string = string> {
   id: T;
@@ -8,7 +9,7 @@ export interface Tab<T extends string = string> {
   /** Hero icon class shown before the label. */
   icon?: string;
   /** Make the tab a route link (e.g. History's Work Orders / Channel Logs). */
-  to?: To;
+  to?: string;
   disabled?: boolean;
   /** Tooltip on a disabled tab: why it can't be opened. */
   disabledReason?: string;
@@ -31,21 +32,6 @@ interface Props<T extends string> {
   className?: string;
 }
 
-const styles = {
-  underline: {
-    list: "gap-4",
-    tab: "border-b-2 px-1 py-2 text-sm font-medium leading-tight",
-    selected: "border-primary-600 text-primary-600",
-    idle: "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700",
-  },
-  pill: {
-    list: "gap-1 rounded-lg bg-gray-100 p-1",
-    tab: "rounded-md px-3 py-2 text-sm font-medium transition-all duration-200",
-    selected: "bg-white text-primary-600 shadow-xs",
-    idle: "text-gray-500 hover:bg-gray-50 hover:text-gray-700",
-  },
-};
-
 /**
  * A row (or column) of tabs. Renders only the tabs; show the active panel
  * yourself.
@@ -61,7 +47,7 @@ export default function Tabs<T extends string>({
   after,
   className,
 }: Props<T>) {
-  const s = styles[variant];
+  const s = tabStyles[variant];
   const vertical = orientation === "vertical";
   const list = (
     <div
@@ -76,13 +62,12 @@ export default function Tabs<T extends string>({
       {tabs.map((tab) => {
         const selected = tab.id === active;
         const classes = cn(
-          "inline-flex items-center gap-2 whitespace-nowrap transition-colors cursor-pointer",
-          "focus-visible:rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600",
+          tabStyles.base,
           s.tab,
           variant === "underline" && !vertical && "-mb-px",
           fill && "flex-1 justify-center",
           selected ? s.selected : s.idle,
-          tab.disabled && "cursor-not-allowed opacity-50 hover:border-transparent hover:bg-transparent hover:text-gray-500"
+          tab.disabled && tabStyles.disabled
         );
         const content = (
           <>

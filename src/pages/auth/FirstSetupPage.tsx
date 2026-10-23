@@ -1,76 +1,74 @@
-import { useState, type FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
-import FirstSetupShell from "../../components/auth/FirstSetupShell";
+import Alert from "../../components/Alert";
 import Header from "../../components/Header";
 import Button from "../../components/Button";
 import { PasswordInput, TextInput } from "../../components/Inputs";
 import { Centered, PageContent } from "../../components/PageContent";
-import { isValidEmail } from "../../utils/validate";
+import { errorMessage } from "../../utils/errors";
+import { useForm } from "../../utils/useForm";
+import { blank, isValidEmail } from "../../utils/validate";
 
-type Fields = { firstName: string; lastName: string; email: string; password: string; passwordConfirmation: string };
+export interface FirstSetupValues {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  passwordConfirmation: string;
+}
+
+/** The contract between this page and whatever feeds it (the replica wrapper, later Lightning). */
+export interface FirstSetupPageProps {
+  /** Creates the superuser. Resolves when the host accepts (it then signs the user in); rejects with field errors or a message. */
+  onSave: (values: FirstSetupValues) => Promise<void>;
+}
 
 /**
- * Inventory view `first-setup` (first_setup_live/superuser.html.heex).
- * Lightning validates on change; here Save enables once the fields would
- * pass the same checks (names, email, password ≥ 8 and matching), and
- * saving goes to /projects.
+ * Inventory view `first-setup` (first_setup_live/superuser.html.heex): the
+ * form that creates the first superuser on a fresh install. The page checks
+ * what Lightning's changeset checks (names, email, a 12-character password
+ * that matches its confirmation) before a save, and shows the host's field
+ * errors on their fields. Props only: the shell around it is the host's.
  */
-export default function FirstSetupPage() {
-  const navigate = useNavigate();
-  const [f, setF] = useState<Fields>({ firstName: "", lastName: "", email: "", password: "", passwordConfirmation: "" });
-  const set = (k: keyof Fields) => (e: React.ChangeEvent<HTMLInputElement>) => setF({ ...f, [k]: e.target.value });
-
-  const errors = {
-    password: f.password && f.password.length < 8 ? ["should be at least 8 character(s)"] : [],
-    passwordConfirmation:
-      f.passwordConfirmation && f.passwordConfirmation !== f.password ? ["does not match password"] : [],
-  };
-  const valid =
-    f.firstName.trim() !== "" &&
-    f.lastName.trim() !== "" &&
-    isValidEmail(f.email) &&
-    f.password.length >= 8 &&
-    f.password === f.passwordConfirmation;
-
-  const onSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    navigate("/projects");
-  };
+export default function FirstSetupPage({ onSave }: FirstSetupPageProps) {
+  const form = useForm<FirstSetupValues>({
+    initial: { firstName: "", lastName: "", email: "", password: "", passwordConfirmation: "" },
+    validate: ({ firstName, lastName, email, password, passwordConfirmation }) => ({
+      firstName: blank(firstName),
+      lastName: blank(lastName),
+      email: email.trim() && !isValidEmail(email) ? ["must be a valid email address"] : blank(email),
+      password: password.length < 12 ? ["Password minimum length is 12 characters."] : [],
+      passwordConfirmation: passwordConfirmation !== password ? ["does not match confirmation"] : [],
+    }),
+  });
 
   return (
-    <FirstSetupShell>
-      <PageContent header={<Header title="Setup" loggedOut />}>
-        <Centered>
-          <p>
-            Looks like this is a fresh install of OpenFn Lightning. Create a superuser account to manage projects and
-            users.
-          </p>
-          <form id="superuser-registration-form" onSubmit={onSubmit} className="mt-4 grid w-1/2 gap-4">
-            <TextInput id="first_name" label="First name" value={f.firstName} onChange={set("firstName")} />
-            <TextInput id="last_name" label="Last name" value={f.lastName} onChange={set("lastName")} />
-            <TextInput id="email" type="email" label="Email" value={f.email} onChange={set("email")} />
-            <PasswordInput
-              id="password"
-              label="Password"
-              autoComplete="new-password"
-              value={f.password}
-              onChange={set("password")}
-              errors={errors.password}
-            />
-            <PasswordInput
-              id="password_confirmation"
-              label="Password confirmation"
-              autoComplete="new-password"
-              value={f.passwordConfirmation}
-              onChange={set("passwordConfirmation")}
-              errors={errors.passwordConfirmation}
-            />
-            <Button type="submit" disabled={!valid} className="justify-self-start">
-              Save
-            </Button>
-          </form>
-        </Centered>
-      </PageContent>
-    </FirstSetupShell>
+    <PageContent header={<Header title="Setup" loggedOut />}>
+      <Centered>
+        <p>
+          Looks like this is a fresh install of OpenFn Lightning. Create a superuser account to manage projects and
+          users.
+        </p>
+        {form.error && (
+          <Alert type="danger" className="mt-4">
+            {errorMessage(form.error)}
+          </Alert>
+        )}
+        <form id="superuser-registration-form" onSubmit={form.submit(onSave)} className="mt-4 grid w-1/2 gap-4" aria-busy={form.pending || undefined}>
+          <TextInput id="first_name" name="first_name" label="First name" {...form.fieldProps("firstName")} />
+          <TextInput id="last_name" name="last_name" label="Last name" {...form.fieldProps("lastName")} />
+          <TextInput id="email" name="email" type="email" label="Email" {...form.fieldProps("email")} />
+          <PasswordInput id="password" name="password" label="Password" autoComplete="new-password" {...form.fieldProps("password")} />
+          <PasswordInput
+            id="password_confirmation"
+            name="password_confirmation"
+            label="Password confirmation"
+            autoComplete="new-password"
+            {...form.fieldProps("passwordConfirmation")}
+          />
+          <Button type="submit" pending={form.pending} className="justify-self-start">
+            Save
+          </Button>
+        </form>
+      </Centered>
+    </PageContent>
   );
 }

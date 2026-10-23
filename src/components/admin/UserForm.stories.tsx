@@ -7,6 +7,7 @@ const meta: Meta<typeof UserForm> = {
   title: "Admin/UserForm",
   component: UserForm,
   decorators: [withRouter],
+  args: { onSave: async () => {} },
 };
 export default meta;
 type Story = StoryObj<typeof UserForm>;

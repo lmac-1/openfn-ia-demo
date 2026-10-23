@@ -6,38 +6,38 @@ import AuthRegisterPage from "./pages/auth/AuthRegisterPage";
 import AuthResetPasswordPage from "./pages/auth/AuthResetPasswordPage";
 import AuthTwoFactorPage from "./pages/auth/AuthTwoFactorPage";
 import AuthConfirmAccountPage from "./pages/auth/AuthConfirmAccountPage";
-import AuthConfirmationRequiredPage from "./pages/auth/AuthConfirmationRequiredPage";
-import AuthConfirmAccessPage from "./pages/auth/AuthConfirmAccessPage";
-import FirstSetupPage from "./pages/auth/FirstSetupPage";
+import AuthConfirmationRequiredPage from "./pages/auth/AuthConfirmationRequiredPage.replica";
+import AuthConfirmAccessPage from "./pages/auth/AuthConfirmAccessPage.replica";
+import FirstSetupPage from "./pages/auth/FirstSetupPage.replica";
 
-import ProjectsDashboardPage from "./pages/projects/ProjectsDashboardPage";
+import ProjectsDashboardPage from "./pages/projects/ProjectsDashboardPage.replica";
 import MfaRequiredPage from "./pages/projects/MfaRequiredPage";
-import WorkflowsIndexPage from "./pages/projects/WorkflowsIndexPage";
-import WorkflowHealthPage from "./pages/projects/WorkflowHealthPage";
+import WorkflowsIndexPage from "./pages/projects/WorkflowsIndexPage.replica";
+import WorkflowHealthPage from "./pages/projects/WorkflowHealthPage.replica";
 import SandboxesIndexPage from "./pages/projects/SandboxesIndexPage";
-import ChannelsIndexPage from "./pages/projects/ChannelsIndexPage";
+import ChannelsIndexPage from "./pages/projects/ChannelsIndexPage.replica";
 import WorkflowEditorPage from "./pages/workflow-editor/WorkflowEditorPage";
 
 import HistoryWorkOrdersPage from "./pages/history/HistoryWorkOrdersPage";
-import HistoryChannelLogsPage from "./pages/history/HistoryChannelLogsPage";
-import ChannelRequestShowPage from "./pages/history/ChannelRequestShowPage";
-import RunShowPage from "./pages/history/RunShowPage";
-import DataclipShowPage from "./pages/history/DataclipShowPage";
+import HistoryChannelLogsPage from "./pages/history/HistoryChannelLogsPage.replica";
+import ChannelRequestShowPage from "./pages/history/ChannelRequestShowPage.replica";
+import RunShowPage from "./pages/history/RunShowPage.replica";
+import DataclipShowPage from "./pages/history/DataclipShowPage.replica";
 
 import ProjectSettingsPage from "./pages/project-settings/ProjectSettingsPage";
 
 import CredentialsIndexPage from "./pages/profile/CredentialsIndexPage";
 import ProfilePage from "./pages/profile/ProfilePage";
-import TokensPage from "./pages/profile/TokensPage";
-import BackupCodesPage from "./pages/profile/BackupCodesPage";
+import TokensPage from "./pages/profile/TokensPage.replica";
+import BackupCodesPage from "./pages/profile/BackupCodesPage.replica";
 
-import AdminUsersPage from "./pages/admin/AdminUsersPage";
-import AdminUserEditPage from "./pages/admin/AdminUserEditPage";
-import AdminProjectsPage from "./pages/admin/AdminProjectsPage";
-import AdminAuditPage from "./pages/admin/AdminAuditPage";
-import AdminMaintenancePage from "./pages/admin/AdminMaintenancePage";
-import AdminAuthProvidersPage from "./pages/admin/AdminAuthProvidersPage";
-import AdminCollectionsPage from "./pages/admin/AdminCollectionsPage";
+import AdminUsersPage from "./pages/admin/AdminUsersPage.replica";
+import AdminUserEditPage from "./pages/admin/AdminUserEditPage.replica";
+import AdminProjectsPage from "./pages/admin/AdminProjectsPage.replica";
+import AdminAuditPage from "./pages/admin/AdminAuditPage.replica";
+import AdminMaintenancePage from "./pages/admin/AdminMaintenancePage.replica";
+import AdminAuthProvidersPage from "./pages/admin/AdminAuthProvidersPage.replica";
+import AdminCollectionsPage from "./pages/admin/AdminCollectionsPage.replica";
 import AdminLiveDashboardPage from "./pages/admin/AdminLiveDashboardPage";
 
 function ProjectRoot() {
@@ -55,6 +55,7 @@ export default function App() {
     <Routes>
       {/* Auth and onboarding: no side menu. */}
       <Route path="/users/log_in" element={<AuthLoginPage />} /> {/* auth-login */}
+      <Route path="/users/log_out" element={<Navigate to="/users/log_in" replace />} />
       <Route path="/users/register" element={<AuthRegisterPage />} /> {/* auth-register */}
       <Route path="/users/reset_password" element={<AuthResetPasswordPage />} /> {/* auth-reset-password */}
       <Route path="/users/reset_password/:token" element={<AuthResetPasswordPage />} />

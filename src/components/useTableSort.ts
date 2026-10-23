@@ -12,7 +12,7 @@ export type SortValue = string | number | boolean | null;
  */
 export function useSort<K extends string>(
   initialKey: K,
-  { initialDirection = "asc", newColumnDirection = "asc" }: { initialDirection?: SortDirection; newColumnDirection?: SortDirection } = {}
+  { initialDirection = "asc", newColumnDirection = "asc" }: { initialDirection?: SortDirection | undefined; newColumnDirection?: SortDirection } = {}
 ) {
   const [sortKey, setSortKey] = useState<K>(initialKey);
   const [direction, setDirection] = useState<SortDirection>(initialDirection);
@@ -67,7 +67,7 @@ export function useTableSort<T, K extends string>({
   /** How to read each sortable column's value from a row. */
   sortMap: Record<K, (row: T) => SortValue>;
   initialKey: NoInfer<K>;
-  initialDirection?: SortDirection;
+  initialDirection?: SortDirection | undefined;
   searchFields?: ((row: T) => string)[];
   nulls?: "first" | "last";
 }) {

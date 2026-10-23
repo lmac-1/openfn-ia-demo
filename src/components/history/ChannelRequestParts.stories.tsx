@@ -11,7 +11,7 @@ import {
   StatusCodeBadge,
 } from "./ChannelRequestParts";
 
-const event = channelRequests[0].events[0];
+const event = channelRequests[0]!.events[0]!;
 
 const meta = {
   title: "History/ChannelRequestParts",
@@ -51,7 +51,7 @@ export const Badges: Story = {
       <MethodBadge method="POST" />
       <MethodBadge method="GET" />
       <MethodBadge method="DELETE" />
-      <RequestPathDisplay event={channelRequests[1].events[0]} />
+      <RequestPathDisplay event={channelRequests[1]!.events[0]!} />
       <StatusCodeBadge status={201} />
       <StatusCodeBadge status={302} />
       <StatusCodeBadge status={404} />

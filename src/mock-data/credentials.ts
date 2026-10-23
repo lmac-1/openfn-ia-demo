@@ -10,7 +10,8 @@ import type { User } from "../types/users";
 import { kickstartCredentials } from "./generated/kickstart";
 import type { Credential, CredentialTypeOption, KeychainCredential, OauthClient, SchemaField } from "../types/credentials";
 
-const [openhie, dhis2Project] = projects;
+const openhie = projects[0]!;
+const dhis2Project = projects[1]!;
 
 export const oauthClients: OauthClient[] = [
   {

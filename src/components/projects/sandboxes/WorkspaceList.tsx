@@ -24,7 +24,7 @@ export default function WorkspaceList({
   sandboxes: SandboxRow[];
   currentProjectId: string;
   canCreate?: boolean;
-  disabledReason?: string;
+  disabledReason?: string | undefined;
   onMerge?: (s: SandboxRow) => void;
   onEdit?: (s: SandboxRow) => void;
   onDelete?: (s: SandboxRow) => void;

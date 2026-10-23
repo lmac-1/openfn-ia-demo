@@ -15,13 +15,20 @@ inline literals scattered through the markup. See **The data seam** below.
 
 **How pages behave** (pending, failure, server-driven lists, loading states)
 is in [STANDARDS.md](./STANDARDS.md). Read it before adding a mutation or a
-list page; `src/pages/profile/TokensPage.tsx` is the worked example.
+list page; `src/pages/profile/TokensPage.tsx` (props only) and its
+`TokensPage.replica.tsx` wrapper (fake data, URL, toasts) are the worked
+example. A page that will move to Lightning follows pattern 11, page and
+wrapper.
 
 ## Commands
 
 - `npm run dev` — start dev server
 - `npm run build` — typecheck and build
-- `npm run lint` — run ESLint
+- `npm test` — run the unit tests (Vitest)
+- `npm run lint` — run ESLint. CI runs it, and warnings fail too. The
+  colour, arbitrary-value and raw-control rules below are lint errors. An
+  exception is disabled on its line with a reason after ` -- `; a reason
+  starting `debt:` is one to fix (`grep -rn "debt:" src`).
 - `npm run storybook` — start Storybook on port 6006
 - `npm run build-storybook` — build Storybook static site
 - `npm run compare:all` — set up a local Lightning and compare it with the
@@ -38,6 +45,8 @@ list page; `src/pages/profile/TokensPage.tsx` is the worked example.
   (`lib/lightning_web/router.ex`), commented with its INVENTORY.md id.
 - `src/pages/<area>/` — one file per Lightning view. Named after the
   inventory id (e.g. `history-work-orders` → `HistoryWorkOrdersPage.tsx`).
+  A view that follows pattern 11 (page and wrapper) adds a
+  `<Name>.replica.tsx` wrapper beside it, and `App.tsx` routes to that.
 - `src/components/` — the component library: primitives at the top level,
   app chrome (sidebar, project picker, user menu) in `shell/`, feature
   components in area subfolders. See **Components** below.
@@ -71,6 +80,9 @@ list page; `src/pages/profile/TokensPage.tsx` is the worked example.
   (`src/annotations/viewIds.ts`). Put `data-annotation` on any sub-panel that
   has its own inventory or shared id. To update, replace the folder with the
   branch's current `annotations/` and update SOURCE.md.
+- `docs/issues/` — known fixes, one file each (the repo has no issue
+  tracker). Delete the file in the PR that fixes it; add one when you find
+  something you won't fix now.
 
 ## Matching Lightning
 
@@ -117,6 +129,7 @@ everywhere. Reach for these first:
 | Need | Use |
 |---|---|
 | An action | `Button` (`to` for routes, `href` for plain links; `size="xs" theme="secondary"` for table row actions; `pending` while its request runs) |
+| A form's values, dirty state and errors | `useForm` from `utils/useForm.ts` (`fieldProps` on each control, `submit` for page forms, `modalSubmit` for `FormModal`; `blank` from `utils/validate.ts` for required fields; never disable submit for invalid values) |
 | A request in flight | `useAction` from `utils/useAction.ts` (pending, error, double-click guard); `Spinner` for anything loading |
 | An icon-only action | `IconButton` (always give it a `label`; `to`/`href` for icon links, `external` to open `href` in a new tab, `tone="danger"`, or pass an SVG element as `icon`) |
 | A button that opens a menu | `ButtonMenu`; `SplitButton` when the button also has its own action |
@@ -130,15 +143,18 @@ everywhere. Reach for these first:
 | A searchable list you pick from with the keyboard | `SearchList` |
 | Show / hide a section | `Disclosure` (`card`, `section` or `inline`) |
 | Switching views | `Tabs` (`underline` or `pill`, horizontal or vertical, buttons or route links) |
+| Picking one value from a few | `SegmentedControl` (a radio group drawn as Tabs' pill track; `disabledReason` shows a Tooltip) |
 | Searching or filtering a list | `SearchInput` |
 | A status chip, badge or tag | `Pill` (`color`, `square`, `mono`; `onRemove` makes it removable) |
 | Any bordered panel, tile or card | `Card` (`title`/`description`/`action` give it a header; `padding`, `muted`, `dashed`) |
 | A heading inside a page | `Heading` (`size` xl/lg/md/sm/eyebrow, `as` for the level) |
 | Labelled values | `DetailList` + `DetailItem` (`rows` or `grid`) |
-| A timestamp | `DateTime` |
+| A timestamp | `DateTime` (hover shows UTC, click copies it) |
+| A tooltip | `Tooltip` (`copy` makes a click copy that text and say "Copied!"); `InfoTooltip` for the faded info icon next to a label |
 | A short work order, run or dataclip id | `UuidChip` (`to` links it, `length={7}` in the workflow editor) |
 | An on/off switch | `Toggle` (`note` adds gray text after the label) |
 | An inline link | `TextLink` (`variant="danger"` for destructive ones) |
+| Read-only code, a log or a dataclip | `CodeViewer` (Monaco; `ariaLabel`, `language`, `highlighted`, `revealLine`) |
 | Tabular data | `Table` with `Tr`, `Th`, `Td`, `EmptyState` (dashed box, or `variant="plain"` for centred text inside a card or list; `title`, `children` below the message) (a clickable `Tr` ignores clicks on links and buttons inside it, so no `stopPropagation`; `<Th actions />` and `<Td actions>` for the row-actions column, `align` for right/centre) |
 | Sorting and filtering a table in the browser | `useTableSort` (or `useSort` for state only, when rows are sorted elsewhere) from `useTableSort.ts` |
 | "Projects (3)" above a table, with its buttons | `TableTitle` |
@@ -161,7 +177,9 @@ They compose primitives and don't carry their own button, input, modal or
 menu styling.
 
 - **Pages compose components** and hold state, route params and mock-data
-  queries. No styled raw `<button>`, `<input>` or `<table>` in pages.
+  queries. No styled raw `<button>`, `<input>` or `<table>` in pages. Under
+  pattern 11 the `.replica.tsx` wrapper holds those, and the page only takes
+  props.
 - **Components never import `src/mock-data/`** (ESLint enforces it; stories
   are exempt). They take records and `can*` booleans as props. See **The data
   seam** below.
@@ -186,6 +204,9 @@ pages, `main.tsx` (the session) and a short, labelled list of components.
   down. When a component needs a join Lightning preloads (a work order's runs,
   a project's owner), give the record type the joined field
   (`HistoryWorkOrder`, `AdminProjectRow`) and build it in the mock-data query.
+- **Pattern 11 pages** narrow the seam to one file: only the `.replica.tsx`
+  wrapper imports mock-data. Wiring that page means writing a Lightning
+  wrapper; the page file doesn't change.
 - **The current user** comes from `useCurrentUser()`, never a fixture import.
 - **Permissions** come from `permissionsFor(project, user)` (or
   `usePermissions(project)`) in the page, passed down as booleans, the way

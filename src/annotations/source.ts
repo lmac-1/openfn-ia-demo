@@ -51,7 +51,7 @@ function parseFrontMatter(raw: string): Record<string, string | string[]> {
   for (const line of raw.split("\n")) {
     const top = line.match(/^([a-z_]+):\s*(.*)$/);
     if (top) {
-      const [, key, value] = top;
+      const [, key = "", value = ""] = top;
       const v = value.replace(/\s+#.*$/, "").trim();
       if (v === "") {
         listKey = key;
@@ -64,7 +64,7 @@ function parseFrontMatter(raw: string): Record<string, string | string[]> {
     }
     const item = line.match(/^ {2}- (.+)$/);
     if (item && listKey && Array.isArray(out[listKey])) {
-      (out[listKey] as string[]).push(item[1].replace(/\s+#.*$/, "").trim());
+      (out[listKey] as string[]).push(item[1]!.replace(/\s+#.*$/, "").trim());
     } else if (/^\S/.test(line)) {
       listKey = null;
     }
@@ -78,14 +78,14 @@ export function getAnnotation(id: string): Annotation | null {
     const text = file(`${folder}/${id}.md`);
     if (text === undefined) continue;
     const match = text.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
-    const frontMatterRaw = match ? match[1] : "";
+    const frontMatterRaw = match?.[1] ?? "";
     return {
       id,
       folder,
       url: `${BLOB_BASE}/${folder}/${id}.md`,
       frontMatterRaw,
       frontMatter: parseFrontMatter(frontMatterRaw),
-      body: match ? match[2] : text,
+      body: match?.[2] ?? text,
     };
   }
   return null;
@@ -96,11 +96,12 @@ function parseInventory(text: string): Map<string, InventoryRow> {
   let section = "";
   for (const line of text.split("\n")) {
     const heading = line.match(/^## (.+)$/);
-    if (heading) section = heading[1].replace(/\s*\(.*$/, "");
+    if (heading) section = heading[1]!.replace(/\s*\(.*$/, "");
     const cells = line.split("|").map((c) => c.trim());
     // | id | Route | Module | Main files | Status |
-    if (cells.length >= 7 && /^[a-z0-9-]+$/.test(cells[1]) && cells[1] !== "id") {
-      rows.set(cells[1], { id: cells[1], section, route: cells[2], status: cells[cells.length - 2] });
+    const [, id = "", route = ""] = cells;
+    if (cells.length >= 7 && /^[a-z0-9-]+$/.test(id) && id !== "id") {
+      rows.set(id, { id, section, route, status: cells.at(-2) ?? "" });
     }
   }
   return rows;

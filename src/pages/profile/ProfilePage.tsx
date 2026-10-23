@@ -12,6 +12,7 @@ import UserDeletionModal from "../../components/admin/UserDeletionModal";
 import { useToast } from "../../components/Toast";
 import { useCurrentUser } from "../../session/session";
 import { fakeTotpSecret, githubOauthEnabled, hasActivityInProjects } from "../../mock-data/profile";
+import { simulateRequest } from "../../mock-data/request";
 
 /**
  * Inventory views `profile-account`, `profile-mfa`, `profile-github`,
@@ -48,13 +49,24 @@ export default function ProfilePage() {
             )}
             <BasicInfoForm
               user={user}
-              onSave={(changes) => {
+              onSave={async (changes) => {
+                await simulateRequest();
                 setUser((u) => ({ ...u, ...changes }));
                 toast("User information updated successfully");
               }}
             />
-            <ChangeEmailForm onSubmit={() => toast("You will receive an email with instructions shortly.")} />
-            <ChangePasswordForm onSubmit={() => toast("Password changed successfully.")} />
+            <ChangeEmailForm
+              onSubmit={async () => {
+                await simulateRequest();
+                toast("You will receive an email with instructions shortly.");
+              }}
+            />
+            <ChangePasswordForm
+              onSubmit={async () => {
+                await simulateRequest();
+                toast("Password changed successfully.");
+              }}
+            />
             <MfaCard
               mfaEnabled={user.mfaEnabled}
               totpSecret={fakeTotpSecret}

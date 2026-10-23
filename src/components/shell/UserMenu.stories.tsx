@@ -26,4 +26,4 @@ const openMenu: Story["play"] = async ({ canvasElement }) => {
 
 export const Closed: Story = {};
 export const Open: Story = { play: openMenu };
-export const ExperimentalFeaturesOn: Story = { args: { user: users[3] }, play: openMenu };
+export const ExperimentalFeaturesOn: Story = { args: { user: users[3]! }, play: openMenu };

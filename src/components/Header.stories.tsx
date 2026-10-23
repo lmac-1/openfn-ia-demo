@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import Header from "./Header";
 import Button from "./Button";
 import ProjectBreadcrumbs from "./shell/ProjectBreadcrumbs";
+import { projectLabel } from "./shell/projectPickerItems";
 import { projects } from "../mock-data/projects";
 import { withRouter } from "../stories/decorators";
 
@@ -14,6 +15,6 @@ export const WithAction: Story = {
   args: { title: "Personal Access Tokens", children: <Button>Generate New Token</Button> },
 };
 export const WithBreadcrumbs: Story = {
-  args: { breadcrumbs: <ProjectBreadcrumbs project={projects[0]} current="History" /> },
+  args: { breadcrumbs: <ProjectBreadcrumbs project={projects[0]!} label={projectLabel(projects[0]!, projects)} current="History" /> },
 };
 export const LoggedOut: Story = { args: { title: "Log in", loggedOut: true } };

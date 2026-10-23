@@ -17,13 +17,14 @@ import { useCurrentUser } from "../../session/session";
 // eslint-disable-next-line no-restricted-imports -- wiring: credential schemas come from the adaptor registry.
 import { credentialTypeOptions, fieldsForSchema } from "../../mock-data/credentials";
 import { formatSchemaName } from "../../utils/format";
+import { blank } from "../../utils/validate";
 import type { Credential, OauthClient } from "../../types/credentials";
 
 interface Props {
   open: boolean;
   onClose: () => void;
   /** Set to edit an existing credential (skips the type picker). */
-  credential?: Credential;
+  credential?: Credential | undefined;
   /** OAuth clients available here; each is offered as a credential type. */
   oauthClients: OauthClient[];
   /** Projects the user can grant access to. */
@@ -75,7 +76,7 @@ export default function CredentialFormModal({
 
   const typeOptions = credentialTypeOptions(oauthClients);
   const client = oauthClients.find((c) => c.id === oauthClientId);
-  const env = envs[tab] ?? envs[0];
+  const env = envs[tab] ?? envs[0]!;
   const fields = schema && schema !== "raw" && schema !== "oauth" ? fieldsForSchema(schema) : [];
 
   const setBody = (key: string, value: string) =>
@@ -85,7 +86,7 @@ export default function CredentialFormModal({
     schema === "oauth"
       ? !!client && authorized
       : schema === "raw"
-        ? editing || (env.body.raw ?? "").trim().length > 0
+        ? editing || (env.body["raw"] ?? "").trim().length > 0
         : editing || fields.filter((f) => f.required).every((f) => (env.body[f.key] ?? "").trim());
   const valid = name.trim().length > 0 && envs.every((e) => e.name.trim()) && bodyValid;
 
@@ -106,7 +107,7 @@ export default function CredentialFormModal({
       id: credential?.id ?? `cred-${Date.now()}`,
       name: name.trim(),
       schema: schema ?? "raw",
-      oauthClientId: schema === "oauth" ? oauthClientId : undefined,
+      ...(schema === "oauth" && { oauthClientId }),
       ownerId: credential?.ownerId ?? user.id,
       projectIds,
       externalId: externalId.trim() || null,
@@ -219,7 +220,7 @@ export default function CredentialFormModal({
             }
             placeholder="e.g., production, staging, development, test, qa"
             value={env.name}
-            errors={env.name.trim() ? [] : ["can't be blank"]}
+            errors={blank(env.name)}
             onChange={(e) =>
               setEnvs((list) => list.map((x, i) => (i === tab ? { ...x, name: e.target.value } : x)))
             }
@@ -233,7 +234,7 @@ export default function CredentialFormModal({
               required
               rows={8}
               className="font-mono"
-              value={env.body.raw ?? ""}
+              value={env.body["raw"] ?? ""}
               onChange={(e) => setBody("raw", e.target.value)}
             />
           ) : (
@@ -289,7 +290,7 @@ function OauthFields({
   authorized,
   onAuthorize,
 }: {
-  client?: OauthClient;
+  client?: OauthClient | undefined;
   authorized: boolean;
   onAuthorize: () => void;
 }) {

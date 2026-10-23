@@ -1,27 +1,25 @@
 import { MemoryRouter } from "react-router-dom";
+import { ReactRouterAdapter } from "../routing/ReactRouterAdapter";
 import type { Decorator } from "@storybook/react";
 import { cn } from "../utils/cn";
 
 /**
- * Wraps a story in a MemoryRouter so components using Link / useLocation work.
- */
-export const withRouter: Decorator = (Story) => (
-  <MemoryRouter initialEntries={["/"]}>
-    <Story />
-  </MemoryRouter>
-);
-
-/**
- * Like {@link withRouter}, but starts the router at a given URL so
- * location-aware components (e.g. the sidebar) render that context.
+ * Wraps a story in a MemoryRouter at a given URL, with the adapter that lets
+ * components navigate through it, so location-aware components (e.g. the
+ * sidebar) render that context.
  */
 export const withRouterAt =
   (path: string): Decorator =>
   (Story) => (
     <MemoryRouter initialEntries={[path]}>
-      <Story />
+      <ReactRouterAdapter>
+        <Story />
+      </ReactRouterAdapter>
     </MemoryRouter>
   );
+
+/** {@link withRouterAt} the root URL. */
+export const withRouter = withRouterAt("/");
 
 /**
  * A gray page background with stacked spacing, for panels that render

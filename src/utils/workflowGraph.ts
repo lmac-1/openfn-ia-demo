@@ -147,7 +147,7 @@ export function templateGraph(template: WorkflowTemplate, projectId: string): Wo
     edges: jobs.map((j, i) =>
       i === 0
         ? edge("edge-new-0", { trigger: trigger.id }, j.id, "always")
-        : edge(`edge-new-${i}`, { job: jobs[i - 1].id }, j.id, "on_job_success")
+        : edge(`edge-new-${i}`, { job: jobs[i - 1]!.id }, j.id, "on_job_success")
     ),
     positions: Object.fromEntries([[trigger.id, { x: 0, y: 0 }], ...jobs.map((j, i) => [j.id, { x: 0, y: RANK * (i + 1) }])]),
   };

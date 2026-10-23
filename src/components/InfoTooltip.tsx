@@ -1,7 +1,8 @@
 import { cn } from "../utils/cn";
+import Tooltip from "./Tooltip";
 
 interface Props {
-  /** Tooltip text (shown on hover via the title attribute). */
+  /** Tooltip text, shown on hover. */
   title: string;
   icon?: string;
   iconClass?: string;
@@ -10,8 +11,7 @@ interface Props {
 
 /**
  * Lightning's `Common.tooltip` (live/components/common.ex): a small faded
- * primary info icon next to a label. Lightning uses a Tippy hook; the demo
- * uses the native title tooltip.
+ * primary info icon next to a label, with its tooltip above.
  */
 export default function InfoTooltip({
   title,
@@ -20,8 +20,17 @@ export default function InfoTooltip({
   className,
 }: Props) {
   return (
-    <span className={cn("relative ml-1 cursor-pointer", className)} title={title} aria-label={title}>
-      <span className={cn(icon, iconClass)} />
-    </span>
+    <Tooltip content={title} side="top">
+      <button
+        type="button"
+        className={cn(
+          "relative ml-1 cursor-pointer rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600",
+          className,
+        )}
+        aria-label={title}
+      >
+        <span className={cn(icon, iconClass)} />
+      </button>
+    </Tooltip>
   );
 }

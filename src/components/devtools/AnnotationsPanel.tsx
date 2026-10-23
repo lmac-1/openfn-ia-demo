@@ -19,7 +19,7 @@ export default function AnnotationsPanel() {
     <aside
       data-devtools
       style={{ width: ANNOTATIONS_PANEL_WIDTH }}
-      className="fixed inset-y-0 right-0 z-[9998] flex flex-col border-l border-gray-200 bg-white shadow-xl"
+      className="fixed inset-y-0 right-0 z-9998 flex flex-col border-l border-gray-200 bg-white shadow-xl"
       aria-label="Annotations"
     >
       <div className="flex h-20 flex-none items-center justify-between gap-2 border-b border-gray-200 px-5">

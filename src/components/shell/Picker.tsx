@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "../../routing/router";
 import { cn } from "../../utils/cn";
 import Modal from "../Modal";
 import SearchList from "../SearchList";
@@ -50,7 +50,7 @@ export interface PickerItem {
 
 interface PickerProps {
   items: PickerItem[];
-  currentId?: string;
+  currentId?: string | undefined;
   placeholder: string;
   emptyMessage: string;
   viewAllLabel: string;
@@ -77,7 +77,8 @@ const iconClasses = (active: boolean) => cn("shrink-0 group-hover:text-white/70"
  * dispatches `openEvent`; search, arrow keys (wrapping) and Enter navigate.
  */
 export default function Picker({ items: allItems, currentId, placeholder, emptyMessage, viewAllLabel, viewAllHref, openEvent, defaultOpen = false }: PickerProps) {
-  const navigate = useNavigate();
+  const { navigate, useLocation } = useRouter();
+  const { hash } = useLocation();
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -114,12 +115,13 @@ export default function Picker({ items: allItems, currentId, placeholder, emptyM
   const go = (row: Row) => {
     setIsOpen(false);
     if (isViewAll(row)) navigate(viewAllHref);
-    else navigate(row.href + (row.sameSection ? window.location.hash : ""));
+    else navigate(row.href + (row.sameSection ? hash : ""));
   };
 
   // Modal brings the backdrop, Escape, click-outside and the focus trap;
   // the panel sits high on the page, like a command palette.
   return (
+    // eslint-disable-next-line no-restricted-syntax -- sized to the viewport
     <Modal open={isOpen} onClose={closePicker} bare className="mt-[15vh] self-start overflow-hidden">
       <SearchList<Row>
         size="lg"

@@ -24,7 +24,8 @@ export interface WorkflowSummary {
 export interface ProjectOverview {
   id: string;
   name: string;
-  role: ProjectRole;
+  /** The user's role, or "support" for a project reached through support access. */
+  role: ProjectRole | "support";
   workflowsCount: number;
   collaboratorsCount: number;
   /** Latest workflow update in the project; null when it has none. */
@@ -32,6 +33,7 @@ export interface ProjectOverview {
 }
 
 export type WorkOrderDisplayState =
+  | "rejected"
   | "pending"
   | "running"
   | "success"
@@ -54,7 +56,22 @@ export interface WorkflowStats {
   /** Counted for the metric cards. */
   pendingWorkorders: number;
   runs: { total: number; pending: number; success: number };
+  /** History filtered to this workflow's work orders in the window; the host builds it. */
+  historyHref?: string | undefined;
+  /** History filtered to this workflow's failed work orders in the window. */
+  failedHistoryHref?: string | undefined;
+  /** The workflow's lifecycle state, shown instead of the switch when the lifecycle is on. */
+  state?: "live" | "draft" | undefined;
+  /** Hover text for the switch; defaults to Lightning's wording from the trigger. */
+  toggleTooltip?: string | undefined;
+  /** Whether any trigger is on (the name greys out when none is); defaults to the switch's state. */
+  triggerEnabled?: boolean | undefined;
 }
+
+/** One row of the workflows index table: the fields it shows, and nothing else. A `WorkflowStats` is one. */
+export type WorkflowRow = Omit<WorkflowStats, "workflow" | "pendingWorkorders" | "runs"> & {
+  workflow: Pick<WorkflowSummary, "id" | "name" | "updatedAt" | "enabled" | "triggerType">;
+};
 
 /** The four metric cards above the workflows table (`ProjectMetrics`). */
 export interface ProjectMetrics {

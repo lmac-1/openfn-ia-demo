@@ -15,4 +15,4 @@ export default meta;
 type Story = StoryObj<typeof RangePicker>;
 
 export const Default: Story = {};
-export const ShortRetention: Story = { args: { retentionDays: 7 } };
+export const ShortRetention: Story = { args: { retentionDays: 14 } };

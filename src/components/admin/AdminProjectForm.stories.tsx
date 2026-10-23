@@ -8,7 +8,7 @@ const meta: Meta<typeof AdminProjectForm> = {
   title: "Admin/AdminProjectForm",
   component: AdminProjectForm,
   decorators: [withRouter],
-  args: { users },
+  args: { users, onSave: async () => {} },
 };
 export default meta;
 type Story = StoryObj<typeof AdminProjectForm>;

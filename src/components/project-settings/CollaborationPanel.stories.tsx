@@ -9,7 +9,7 @@ const meta: Meta<typeof CollaborationPanel> = {
   component: CollaborationPanel,
   decorators: [withGrayPanel],
   args: {
-    initialMembers: projects[0].members,
+    initialMembers: projects[0]!.members,
     users,
     currentUserId: session.user.id,
     initialSupportAccess: false,

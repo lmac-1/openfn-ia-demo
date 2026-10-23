@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "../routing/router";
 
 /**
  * Breadcrumb trail for the page header (Lightning's `breadcrumbs`,

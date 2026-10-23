@@ -5,7 +5,7 @@ import { users } from "../../mock-data/users";
 const meta: Meta<typeof RemoveCollaboratorModal> = {
   title: "Project settings/RemoveCollaboratorModal",
   component: RemoveCollaboratorModal,
-  args: { user: users[1], onCancel: () => {}, onConfirm: () => {} },
+  args: { user: users[1]!, onCancel: () => {}, onConfirm: () => {} },
 };
 export default meta;
 type Story = StoryObj<typeof RemoveCollaboratorModal>;

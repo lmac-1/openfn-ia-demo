@@ -1,6 +1,6 @@
 import type { ComponentProps, ReactNode } from "react";
 import { cn } from "../utils/cn";
-import { errorMessage, RequestError } from "../utils/errors";
+import { errorMessage } from "../utils/errors";
 import { useAction } from "../utils/useAction";
 import Alert from "./Alert";
 import Button from "./Button";
@@ -19,20 +19,15 @@ interface Props extends Omit<ComponentProps<typeof Modal>, "footer" | "bare"> {
   submitLabel: ReactNode;
   submitTheme?: "primary" | "danger";
   submitDisabled?: boolean;
-  submitId?: string;
+  submitId?: string | undefined;
   /** Shown on hover over the submit button, e.g. why it's disabled. */
-  submitTooltip?: string;
-  cancelLabel?: ReactNode;
+  submitTooltip?: string | undefined;
+  cancelLabel?: ReactNode | undefined;
   cancelId?: string;
   /** Classes for the form, i.e. the spacing between fields. */
   formClassName?: string;
   /** Content above the form, outside it (e.g. an Alert). */
   before?: ReactNode;
-  /**
-   * Called with the field errors of a failed submit, instead of showing the
-   * message in the modal. The form shows them on its fields.
-   */
-  onFieldErrors?: (fieldErrors: Record<string, string[]>) => void;
 }
 
 /**
@@ -55,22 +50,11 @@ export default function FormModal({
   cancelId,
   formClassName = "space-y-6",
   before,
-  onFieldErrors,
   onClose,
   children,
   ...modal
 }: Props) {
-  const submit = useAction(async () => {
-    try {
-      await onSubmit();
-    } catch (e) {
-      if (e instanceof RequestError && e.hasFieldErrors && onFieldErrors) {
-        onFieldErrors(e.fieldErrors);
-        return;
-      }
-      throw e;
-    }
-  });
+  const submit = useAction(onSubmit);
   const close = () => {
     if (submit.pending) return;
     submit.reset();

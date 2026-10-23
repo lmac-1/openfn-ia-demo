@@ -20,7 +20,7 @@ export const Default: Story = {
           <Th>Role</Th>
         </Tr>
       }
-      footer={<Pagination pageNumber={1} pageSize={10} totalEntries={users.length} />}
+      footer={<Pagination page={{ number: 1, size: 10, totalEntries: users.length }} />}
     >
       {users.map((u) => (
         <Tr key={u.id} onClick={() => {}}>

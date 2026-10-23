@@ -1,8 +1,10 @@
 import { useState } from "react";
-import type { Project, ProjectRole } from "../../types/projects";
+import type { AdminProjectForm as FormData, AdminProjectFormValues, AdminProjectUser } from "../../types/admin";
+import type { ProjectRole } from "../../types/projects";
 import { fullName, urlSafeName } from "../../utils/format";
-import type { User } from "../../types/users";
 import { cn } from "../../utils/cn";
+import { RequestError, errorMessage } from "../../utils/errors";
+import { useAction } from "../../utils/useAction";
 import SearchInput from "../SearchInput";
 import Alert from "../Alert";
 import Button from "../Button";
@@ -16,7 +18,7 @@ type Role = ProjectRole | "";
 const ROLES: ProjectRole[] = ["owner", "admin", "editor", "viewer"];
 
 interface Row {
-  user: User;
+  user: AdminProjectUser;
   role: Role;
 }
 
@@ -32,31 +34,48 @@ const sortMap: Record<SortKey, (r: Row) => SortValue> = {
   viewer: (r) => r.role === "viewer",
 };
 
-const searchFields: ((r: Row) => string)[] = [(r) => fullName(r.user), (r) => r.user.email];
+const searchFields: ((r: Row) => string)[] = [(r) => fullName(r.user), (r) => r.user.email, (r) => r.role];
 
 interface Props {
   /** The project being edited; omit for /settings/projects/new. */
-  project?: Project;
-  users: User[];
-  onSave?: (name: string, roles: Record<string, Role>) => void;
+  project?: FormData["project"] | undefined;
+  users: AdminProjectUser[];
+  /** Saves the form. Rejects with field errors (`rawName`, `owner`) or a message, shown by the form. */
+  onSave: (values: AdminProjectFormValues) => Promise<void>;
+  /** Where Cancel goes. */
+  cancelTo?: string;
 }
 
 /**
  * The superuser project form (project_live/form_component.html.heex): a
  * name (with the slug it will get) and a role radio grid for every user in
- * the instance. Save needs a name and exactly one owner.
+ * the instance. Save is always enabled: pressing it without a name or
+ * exactly one owner shows why and sends nothing. The host checks both again
+ * and replies its own owner error.
  */
-export default function AdminProjectForm({ project, users, onSave }: Props) {
+export default function AdminProjectForm({ project, users, onSave, cancelTo = "/settings/projects" }: Props) {
   const [rawName, setRawName] = useState(project?.name ?? "");
   const [roles, setRoles] = useState<Record<string, Role>>(() =>
     Object.fromEntries(users.map((u) => [u.id, project?.members.find((m) => m.userId === u.id)?.role ?? ""]))
   );
-  const rows: Row[] = users.map((user) => ({ user, role: roles[user.id] }));
+  // Errors show once something has changed or Save was pressed.
+  const [touched, setTouched] = useState(false);
+  const rows: Row[] = users.map((user) => ({ user, role: roles[user.id] ?? "" }));
   const sort = useTableSort({ rows, initialKey: "name", sortMap, searchFields });
+  const save = useAction(() => onSave({ rawName, roles }));
 
   const name = urlSafeName(rawName);
   const owners = Object.values(roles).filter((r) => r === "owner").length;
   const valid = name !== "" && owners === 1;
+  const fieldErrors = save.error instanceof RequestError ? save.error.fieldErrors : {};
+  const ownerError =
+    fieldErrors["owner"]?.[0] ??
+    (owners > 1
+      ? "A project can have only one owner."
+      : touched && owners === 0
+        ? "Every project must have exactly one owner. Please specify one below."
+        : null);
+  const otherError = save.error && !fieldErrors["owner"] && !fieldErrors["rawName"] ? errorMessage(save.error) : null;
 
   const th = (key: SortKey, label: string, center = true) => (
     <Th align={center ? "center" : "left"} {...sort.thProps(key)}>
@@ -68,15 +87,23 @@ export default function AdminProjectForm({ project, users, onSave }: Props) {
     <div id={`project-form-${project?.id ?? "new"}`}>
       <form
         id="project-form"
+        aria-busy={save.pending || undefined}
         onSubmit={(e) => {
           e.preventDefault();
-          if (valid) onSave?.(name, roles);
+          setTouched(true);
+          if (valid) void save.run();
         }}
       >
         <NameField
           id="project_raw_name"
+          name="raw_name"
           value={rawName}
-          onChange={setRawName}
+          onChange={(raw) => {
+            setRawName(raw);
+            setTouched(true);
+            save.reset();
+          }}
+          errors={fieldErrors["rawName"] ?? (touched && name === "" ? ["can't be blank"] : [])}
           badgeLabel="Note that this project will be named:"
           fieldClassName="w-1/2"
         />
@@ -84,7 +111,8 @@ export default function AdminProjectForm({ project, users, onSave }: Props) {
           Manage project users
         </Heading>
 
-        {owners > 1 && <Alert type="danger">A project can have only one owner.</Alert>}
+        {ownerError && <Alert type="danger">{ownerError}</Alert>}
+        {otherError && <Alert type="danger">{otherError}</Alert>}
 
         <SearchInput value={sort.filter} onChange={sort.setFilter} placeholder="Filter users..." className="mb-4 max-w-sm" />
 
@@ -114,7 +142,11 @@ export default function AdminProjectForm({ project, users, onSave }: Props) {
                       id={`project_users_${user.id}_role_${r || "no_access"}`}
                       label={<span className="sr-only">{`${fullName(user)}: ${r || "no access"}`}</span>}
                       checked={role === r}
-                      onChange={() => setRoles((prev) => ({ ...prev, [user.id]: r }))}
+                      onChange={() => {
+                        setRoles((prev) => ({ ...prev, [user.id]: r }));
+                        setTouched(true);
+                        save.reset();
+                      }}
                     />
                   </span>
                 </Td>
@@ -123,10 +155,10 @@ export default function AdminProjectForm({ project, users, onSave }: Props) {
           ))}
         </Table>
         <div className="mt-4 flex gap-1">
-          <Button theme="secondary" to="/settings/projects">
+          <Button theme="secondary" to={cancelTo}>
             Cancel
           </Button>
-          <Button type="submit" disabled={!valid}>
+          <Button type="submit" pending={save.pending}>
             Save
           </Button>
         </div>

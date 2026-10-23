@@ -4,7 +4,6 @@
  * (assets/js/hooks/index.ts), utils/duration.ts and Lightning.Helpers.
  */
 import type { WebhookAuthMethod } from "../types/project-settings";
-import type { ApiToken } from "../types/tokens";
 import type { User } from "../types/users";
 
 const MONTHS = [
@@ -27,7 +26,7 @@ const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Frida
 function ordinal(n: number) {
   const s = ["th", "st", "nd", "rd"];
   const v = n % 100;
-  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+  return n + (s[(v - 20) % 10] || s[v] || "th");
 }
 
 function pad(n: number) {
@@ -78,7 +77,7 @@ export function formatRelativeDetailed(iso: string, now: Date = new Date()) {
 
 /** The ISO tooltip Lightning shows on hover: "2026-10-14 09:12:00 UTC". */
 export function formatUtc(iso: string) {
-  return new Date(iso).toISOString().replace("T", " ").replace(/\.\d+Z$|Z$/, " UTC");
+  return new Date(iso).toISOString().replace("T", " ").replace(/(\.000)?Z$/, " UTC");
 }
 
 /** "2 hours ago", via Intl.RelativeTimeFormat. */
@@ -128,6 +127,18 @@ export function formatUs(us: number | null) {
   if (us === null) return "—";
   const ms = us / 1000;
   return Number.isInteger(ms) ? String(ms) : String(Math.round(ms * 10) / 10);
+}
+
+/**
+ * channel_request_live/helpers.ex `format_bytes`: binary units (1024) with
+ * one decimal kept, B, KB and MB only. 4096 -> "4.0 KB", 15 -> "15 B".
+ * The channel request page uses it; the rest of the app is decimal (below).
+ */
+export function formatBinaryBytes(bytes: number | null): string {
+  if (bytes === null) return "—";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1_048_576) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / 1_048_576).toFixed(1)} MB`;
 }
 
 /**
@@ -229,11 +240,6 @@ export function formatNumber(n: number): string {
 
 export function fullName(user: Pick<User, "firstName" | "lastName">): string {
   return [user.firstName, user.lastName].filter(Boolean).join(" ");
-}
-
-/** Lightning's `mask_token`: "..." plus the last 10 characters. */
-export function maskToken(token: ApiToken): string {
-  return "..." + token.token.slice(-10);
 }
 
 /** Lightning's `format_schema_name`: "dhis2" → "Dhis2", "aws-s3" → "Aws-s3". */

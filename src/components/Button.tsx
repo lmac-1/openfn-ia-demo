@@ -1,7 +1,8 @@
 import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode, Ref } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "../routing/router";
 import { cn } from "../utils/cn";
 import Spinner from "./Spinner";
+import Tooltip from "./Tooltip";
 
 export type ButtonTheme = "primary" | "secondary" | "danger" | "success" | "warning";
 export type ButtonSize = "xs" | "sm" | "md" | "lg";
@@ -53,7 +54,7 @@ function buttonClasses(theme: ButtonTheme, size: ButtonSize = "md", disabled = f
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   theme?: ButtonTheme;
-  size?: ButtonSize;
+  size?: ButtonSize | undefined;
   /** Render as a router link instead of a <button>. */
   to?: string;
   /** Render as a plain link (external pages, downloads, SSO handlers). */
@@ -64,7 +65,7 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   target?: string;
   rel?: string;
   /** Shown on hover (often why it's disabled). */
-  tooltip?: string;
+  tooltip?: string | undefined;
   /**
    * The action is in flight: the button is disabled and shows a spinner
    * before its label. Pass `useAction().pending` or let `FormModal` /
@@ -140,9 +141,9 @@ export default function Button({
   );
   // Disabled buttons don't get hover events in every browser, so the tooltip goes on a wrapper.
   return disabled && tooltip && !pending ? (
-    <span title={tooltip} className="inline-flex">
-      {button}
-    </span>
+    <Tooltip content={tooltip}>
+      <span className="inline-flex">{button}</span>
+    </Tooltip>
   ) : (
     button
   );

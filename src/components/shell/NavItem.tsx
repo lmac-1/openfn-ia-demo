@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "../../routing/router";
 import { cn } from "../../utils/cn";
 
 interface Props {
   /** In-app route. */
-  to?: string;
+  to?: string | undefined;
   /** External link (docs, community, mailto). Opens in a new tab unless `target` says otherwise. */
   href?: string;
   target?: string;

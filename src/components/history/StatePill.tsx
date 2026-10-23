@@ -58,7 +58,7 @@ const channelConfig: Record<ChannelRequestState, { text: string; color: PillColo
 };
 
 /** A channel request state pill (`channel_state_pill`). `title` is its hover text. */
-export function ChannelStatePill({ state, title }: { state: ChannelRequestState; title?: string }) {
+export function ChannelStatePill({ state, title }: { state: ChannelRequestState; title?: string | undefined }) {
   const { text, color } = channelConfig[state];
   return (
     <Pill color={color} title={title}>

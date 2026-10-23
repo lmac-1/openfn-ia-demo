@@ -31,7 +31,7 @@ export const Large: Story = {
         size="lg"
         items={items}
         getKey={(p) => p.id}
-        isSelected={(p) => p.id === projects[0].id}
+        isSelected={(p) => p.id === projects[0]!.id}
         query={query}
         onQueryChange={setQuery}
         onSelect={() => {}}

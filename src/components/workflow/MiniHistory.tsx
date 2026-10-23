@@ -2,13 +2,12 @@ import { useState } from "react";
 import type { Run, WorkOrder } from "../../types/history";
 import { cn } from "../../utils/cn";
 import Card from "../Card";
-import DateTime from "../DateTime";
 import Heading from "../Heading";
 import IconButton from "../IconButton";
 import UuidChip from "../UuidChip";
 import StatePill from "../history/StatePill";
 import RunBadge from "./RunBadge";
-import { formatDuration, uuidOf } from "../../utils/format";
+import { formatDuration, formatRelative, uuidOf } from "../../utils/format";
 
 const Dot = () => <span className="text-gray-800">&bull;</span>;
 
@@ -79,7 +78,7 @@ export default function MiniHistory({
           const selected = runs.some((r) => r.id === selectedRunId);
           const isExpanded = expanded === workOrder.id;
           const expand = () => {
-            if (!isExpanded && runs.length === 1) onSelectRun(runs[0].id);
+            if (!isExpanded && runs.length === 1) onSelectRun(runs[0]!.id);
             setExpanded((p) => (p === workOrder.id ? "" : workOrder.id));
           };
           return (
@@ -107,7 +106,7 @@ export default function MiniHistory({
                     onClick={(e) => e.stopPropagation()}
                   />
                   <Dot />
-                  <DateTime value={workOrder.lastActivity} className="text-gray-500" />
+                  <span className="text-gray-500">{formatRelative(workOrder.lastActivity)}</span>
                 </div>
                 <StatePill labelMode="raw" state={workOrder.state} />
               </div>
@@ -150,7 +149,7 @@ export default function MiniHistory({
                         {(run.startedAt || run.finishedAt) && (
                           <>
                             <Dot />
-                            <DateTime value={run.startedAt || run.finishedAt} />
+                            {formatRelative((run.startedAt || run.finishedAt)!)}
                           </>
                         )}
                         {run.startedAt && run.finishedAt && (

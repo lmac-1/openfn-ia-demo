@@ -7,10 +7,10 @@ const meta: Meta<typeof LinkedUsageModal> = {
   title: "Project settings/LinkedUsageModal",
   component: LinkedUsageModal,
   decorators: [withRouter],
-  args: { projectId: webhookAuthMethods[0].projectId, authMethod: webhookAuthMethods[0], onClose: () => {} },
+  args: { projectId: webhookAuthMethods[0]!.projectId, authMethod: webhookAuthMethods[0]!, onClose: () => {} },
 };
 export default meta;
 type Story = StoryObj<typeof LinkedUsageModal>;
 
 export const Triggers: Story = {};
-export const Channels: Story = { args: { authMethod: webhookAuthMethods[1] } };
+export const Channels: Story = { args: { authMethod: webhookAuthMethods[1]! } };

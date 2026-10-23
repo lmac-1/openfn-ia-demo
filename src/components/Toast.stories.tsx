@@ -25,7 +25,7 @@ function Trigger() {
   );
 }
 
-/** Click a button: the provider shows the toast bottom-centre and clears it after a few seconds. */
+/** Click a button: the toast shows bottom-centre and goes after 5 s. Point at it or tab into it to keep it; click it, its X or press Escape to close it. */
 export const WithProvider: Story = {
   render: () => (
     <ToastProvider>

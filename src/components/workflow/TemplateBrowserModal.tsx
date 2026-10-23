@@ -42,6 +42,7 @@ export default function TemplateBrowserModal({ isOpen, onClose, projectId, templ
 
   return (
     <Modal open={isOpen} onClose={onClose} size="2xl" title="Templates">
+      {/* eslint-disable-next-line no-restricted-syntax -- sized to the viewport */}
       <div className="flex h-[70vh] max-h-160 gap-6 text-sm">
         <div className="w-76 shrink-0 overflow-y-auto">
           <div className="sticky top-0 z-10 bg-white pb-2">

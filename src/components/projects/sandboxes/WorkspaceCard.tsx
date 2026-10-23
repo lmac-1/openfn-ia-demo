@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "../../../routing/router";
 import type { SandboxRow } from "../../../types/sandboxes";
 import { cn } from "../../../utils/cn";
 import { formatUtcDate } from "../../../utils/format";
@@ -39,7 +39,7 @@ export default function WorkspaceCard({
   onDelete?: () => void;
   onRestore?: () => void;
 }) {
-  const navigate = useNavigate();
+  const { navigate } = useRouter();
   const deleted = workspace.scheduledDeletion;
   const env = workspace.env?.trim() ? workspace.env : isRoot ? "main" : null;
   const color = (!isRoot && workspace.color) || "var(--color-primary-600)";

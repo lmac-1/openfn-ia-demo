@@ -163,6 +163,7 @@ plug, which applies the same policy.
 - On load, on each range change, every 30 seconds while the tab is visible, and on returning to the tab: three cookie-authenticated GETs, each with an `x-timezone` header (`WorkflowHealth.tsx:48-56`; `useHealthQuery.ts:30-65`, `:103-136`)
 - The runs reply carries `vary: x-timezone` (`workflow_health_controller.ex:41-53`)
 - Drill-down links open History in a new tab (`TriageTable.tsx:158-167`; `Donut.tsx:87-91`, `:131-134`; `VolumeBars.tsx:182-191`)
+  - **Changed on purpose in the port:** the ported page opens these links in the same tab. Lucy chose this on 23 Oct 2026 because a new tab is jarring. Don't restore the new tab for parity.
 
 **Deferred side effects**
 - none
@@ -336,7 +337,7 @@ Feature: Workflow health
     Given the triage row "fail:RuntimeError @ Load" shows 2
     When I click "View history" on that row
     Then the flow "flow-workflow-health-drilldown" has started (its S01)
-    And this page stays open in this tab
+    And History opens in this tab, not a new one (changed on purpose; Lightning opened a new tab)
     # TriageTable.tsx:130-137, :154-196; historyUrl.ts:13-36
 
   @S15 @pending
@@ -345,7 +346,7 @@ Feature: Workflow health
     Given "Outcomes" shows "Failed 6"
     When I click "Failed" in the "Outcomes" legend
     Then the flow "flow-workflow-health-drilldown" has started
-    And this page stays open in this tab
+    And History opens in this tab, not a new one (changed on purpose; Lightning opened a new tab)
     # Donut.tsx:87-91, :128-152; OutcomesDonut.tsx:57-76; FailureBreakdownDonut.tsx:66; historyUrl.ts:47-56
     # OutcomesDonut.test.tsx:154-195; FailureBreakdownDonut.test.tsx:133-150
 
@@ -555,7 +556,7 @@ Feature: Workflow health
 
 ## Proposed flows
 
-- **flow-workflow-health-drilldown** (new): a legend row or wedge in "Outcomes" or "Failure breakdown" opens History in a new tab with `filters[workflow_id]`, `filters[log]=true`, `filters[date_after]` set to the slice's window start and one `filters[<state>]=true` per state the slice counts (all six failure states for "Failed"); History lists those work orders (`Donut.tsx:87-91`, `:128-152`; `OutcomesDonut.tsx:57-76`; `FailureBreakdownDonut.tsx:61-67`; `historyUrl.ts:13-56`; `OutcomesDonut.test.tsx:154-195`). flow-workflow-health-drilldown lists these links as outside its scope (its 6.5); the lead may fold them in instead. Surfaces: workflow-health, history-work-orders.
+- **flow-workflow-health-drilldown** (new): a legend row or wedge in "Outcomes" or "Failure breakdown" opens History (in a new tab in Lightning today; in the same tab in the port, chosen on purpose) with `filters[workflow_id]`, `filters[log]=true`, `filters[date_after]` set to the slice's window start and one `filters[<state>]=true` per state the slice counts (all six failure states for "Failed"); History lists those work orders (`Donut.tsx:87-91`, `:128-152`; `OutcomesDonut.tsx:57-76`; `FailureBreakdownDonut.tsx:61-67`; `historyUrl.ts:13-56`; `OutcomesDonut.test.tsx:154-195`). flow-workflow-health-drilldown lists these links as outside its scope (its 6.5); the lead may fold them in instead. Surfaces: workflow-health, history-work-orders.
 - **flow-login-return-to** (referenced; proposed by shared-authenticated-session): a signed-out visitor following the failure alert's or digest's health link is sent to log in and returned to the health page afterwards (`router.ex:189-190`). Surfaces: email:failure-alert, email:project-digest, controller:user-session, workflow-health.
 - Referenced, existing: flow-workflow-health-drilldown (S14, entry), flow-failure-alert-email (S25, exit), flow-digest-email (S26, exit of its S06), flow-delete-open-workflow (S27).
 

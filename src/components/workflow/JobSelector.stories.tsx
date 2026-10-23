@@ -7,7 +7,7 @@ const meta: Meta<typeof JobSelector> = {
   title: "Workflow/JobSelector",
   component: JobSelector,
   decorators: [(Story) => <div className="h-72 p-4"><Story /></div>],
-  args: { currentJob: jobs[0], jobs, onChange: () => {} },
+  args: { currentJob: jobs[0]!, jobs, onChange: () => {} },
 };
 export default meta;
 type Story = StoryObj<typeof JobSelector>;

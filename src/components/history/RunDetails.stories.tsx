@@ -27,5 +27,5 @@ export const Running: Story = { args: { ...base, run: run("run-4"), index: 1, to
 
 export const OneStep: Story = {
   args: { ...base, run: run("run-1"), index: 1, total: 1 },
-  render: () => <StepListItem step={run("run-1").steps[0]} run={run("run-1")} projectId="p" workflowId="wf-openhie" />,
+  render: () => <StepListItem step={run("run-1").steps[0]!} run={run("run-1")} projectId="p" workflowId="wf-openhie" />,
 };

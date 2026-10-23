@@ -80,7 +80,7 @@ function WizardBreadcrumb({ step, onChoose }: { step: "choose" | "configure"; on
   );
 }
 
-function WizardFooter({ label, onPrimary, onCancel }: { label: string; onPrimary: () => void; onCancel?: () => void }) {
+function WizardFooter({ label, onPrimary, onCancel }: { label: string; onPrimary: () => void; onCancel?: (() => void) | undefined }) {
   const primary = (
     <Button onClick={onPrimary} className={onCancel ? undefined : "w-full"}>
       {label}

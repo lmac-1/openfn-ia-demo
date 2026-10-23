@@ -14,9 +14,9 @@ const meta: Meta<typeof RunViewerPanel> = {
     projectId: "4adf2644-ed4e-4f97-a24c-ab35b3cb1efa",
     run,
     steps,
-    logs: runLogs["run-1"],
+    logs: runLogs["run-1"]!,
     dataclips,
-    selectedStepId: steps[0].id,
+    selectedStepId: steps[0]!.id,
     onSelectStep: () => {},
     activeTab: "log",
   },
@@ -28,5 +28,5 @@ export const Logs: Story = {};
 export const Input: Story = { args: { activeTab: "input" } };
 export const Output: Story = { args: { activeTab: "output" } };
 export const FailedRun: Story = {
-  args: { run: findRun("run-2")!, steps: stepsOf(findRun("run-2")!), logs: runLogs["run-2"], selectedStepId: "step-2a" },
+  args: { run: findRun("run-2")!, steps: stepsOf(findRun("run-2")!), logs: runLogs["run-2"]!, selectedStepId: "step-2a" },
 };

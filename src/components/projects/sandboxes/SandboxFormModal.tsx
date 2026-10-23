@@ -31,7 +31,7 @@ export default function SandboxFormModal({
 }) {
   const [rawName, setRawName] = useState(initialName);
   const [color, setColor] = useState<string | null>(
-    () => initialColor ?? sandboxColorPalette[Math.floor(Math.random() * sandboxColorPalette.length)]
+    () => initialColor ?? sandboxColorPalette[Math.floor(Math.random() * sandboxColorPalette.length)]!
   );
   const name = urlSafeName(rawName);
   const errors = existingNames.includes(name) && name !== initialName ? ["Sandbox name already exists"] : [];

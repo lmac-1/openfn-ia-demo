@@ -60,6 +60,7 @@ export default function LandingScreen({ aiAssistantEnabled = true, onBuildWithAI
               </Pill>
             </div>
             <Card padding="none" className="focus-within:shadow-card">
+              {/* eslint-disable-next-line no-restricted-syntax -- debt: chat composer; TextArea has no borderless variant (also AIAssistantPanel) */}
               <textarea
                 id="build-with-ai-input"
                 value={prompt}

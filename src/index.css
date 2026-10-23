@@ -129,3 +129,11 @@
   outline: 2px dashed var(--color-amber-500);
   outline-offset: 2px;
 }
+
+/* CodeViewer's step bar, in Monaco's line-decorations column. Lightning's
+   app.css has the same rule under the same name. */
+.log-viewer-highlighted {
+  background-color: var(--color-yellow-400);
+  margin-left: 0.25rem;
+  width: 0.125rem !important;
+}

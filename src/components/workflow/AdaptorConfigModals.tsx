@@ -19,7 +19,7 @@ interface Props {
    * Reopen "Configure connection" when the picker was opened from it and
    * closes (the inspector does; the IDE doesn't).
    */
-  returnToConfigure?: boolean;
+  returnToConfigure?: boolean | undefined;
 }
 
 /**

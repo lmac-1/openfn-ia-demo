@@ -1,10 +1,10 @@
 import type { MouseEvent, ReactNode } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "../routing/router";
 import { cn } from "../utils/cn";
 
 interface Props {
   /** In-app route, or an external URL when `external` is set. */
-  to?: string;
+  to?: string | undefined;
   /** Plain href (mailto:, docs links). */
   href?: string;
   /** Open `to` in a new tab as an external link. */
@@ -35,7 +35,7 @@ export default function TextLink({ to, href, external = false, target, onClick, 
   const classes = cn(variant !== "plain" && "link", variant === "danger" && "link-danger", className);
   if (to && !external) {
     return (
-      <Link to={to} id={id} aria-label={ariaLabel} className={classes} title={title} onClick={onClick} data-ui="link" data-variant={variant}>
+      <Link to={to} target={target} id={id} aria-label={ariaLabel} className={classes} title={title} onClick={onClick} data-ui="link" data-variant={variant}>
         {children}
       </Link>
     );

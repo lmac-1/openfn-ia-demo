@@ -23,7 +23,7 @@ export default function SettingsMenu() {
   const annotations = useAnnotations();
 
   return (
-    <div data-devtools className="fixed bottom-5 z-[9999]" style={{ right: annotations.open ? ANNOTATIONS_PANEL_WIDTH + 20 : 20 }}>
+    <div data-devtools className="fixed bottom-5 z-9999" style={{ right: annotations.open ? ANNOTATIONS_PANEL_WIDTH + 20 : 20 }}>
       <Popover
         align="end"
         className="w-80 p-4"

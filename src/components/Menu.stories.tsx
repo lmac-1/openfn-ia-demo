@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import Button from "./Button";
 import IconButton from "./IconButton";
-import Menu, { MenuDivider, MenuHeader, MenuItem, MenuSection } from "./Menu";
+import Menu, { MenuDivider, MenuHeader, MenuItem, MenuLink, MenuSection } from "./Menu";
 import { withRouter } from "../stories/decorators";
 
 const meta: Meta<typeof Menu> = {
@@ -79,5 +79,26 @@ export const WithSectionsAndHeader: Story = {
     ),
   },
 };
+
+/** A link inside a notice: a menu item the arrow keys reach, in the notice's colour. */
+export const WithInlineLink: Story = {
+  args: {
+    children: (
+      <>
+        <div className="bg-amber-50 px-4 py-3">
+          <p className="text-xs text-gray-600">You're using features that are still being built.</p>
+          <p className="mt-1.5 text-xs text-amber-700">
+            <MenuLink to="/profile">Turn off in your profile</MenuLink>
+          </p>
+        </div>
+        <MenuDivider />
+        <MenuItem icon="hero-user-circle" to="/profile">
+          User Profile
+        </MenuItem>
+      </>
+    ),
+  },
+};
+
 /** `panelProps` reach the portalled panel, so the annotations panel can find its `data-annotation`. */
 export const WithPanelProps: Story = { args: { panelProps: { "data-annotation": "workflow-editor-versions-and-promote" } } };

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { AIMessage, AISession } from "../../types/ai-assistant";
+import { assetUrl } from "../../utils/assets";
 import { cn } from "../../utils/cn";
 import Button from "../Button";
 import Card from "../Card";
@@ -65,7 +66,7 @@ export default function AIAssistantPanel({ sessions, onClose }: Props) {
       aria-label="AI Assistant"
     >
       <div className="flex h-20 flex-none items-center gap-2 border-b border-gray-200 px-6 shadow-xs">
-        <img src={`${import.meta.env.BASE_URL}images/logo.svg`} alt="OpenFn" className="size-6" />
+        <img src={assetUrl("images/logo.svg")} alt="OpenFn" className="size-6" />
         <Heading as="h2" className="flex-1">
           Assistant
         </Heading>
@@ -152,6 +153,7 @@ export default function AIAssistantPanel({ sessions, onClose }: Props) {
             <div className="flex-1 overflow-y-auto">
               <div className="space-y-0.5 p-3">
                 {shown.map((s) => (
+                  // eslint-disable-next-line no-restricted-syntax -- a whole session row is the control
                   <button
                     key={s.id}
                     type="button"
@@ -185,6 +187,7 @@ export default function AIAssistantPanel({ sessions, onClose }: Props) {
           }}
         >
           <div className={cn("rounded-xl border-2", input.trim() ? "border-primary-300" : "border-gray-200 hover:border-gray-300")}>
+            {/* eslint-disable-next-line no-restricted-syntax -- debt: chat composer; TextArea has no borderless variant (also LandingScreen) */}
             <textarea
               data-testid="chat-input"
               value={input}

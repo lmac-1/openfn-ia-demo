@@ -72,13 +72,13 @@ node kickstart/sync.mjs
 }
 
 # 5. Replica.
-if ! curl -sf -o /dev/null http://localhost:5173/openfn-ia-demo/; then
+if ! curl -sf -o /dev/null http://localhost:5173/openfn-3-poc/; then
   step "Starting the replica on :5173 (log: $LOG_DIR/vite.log)"
   nohup npx vite --port 5173 --strictPort >"$LOG_DIR/vite.log" 2>&1 &
-  timeout 60 bash -c "until curl -sf -o /dev/null http://localhost:5173/openfn-ia-demo/; do sleep 1; done"
+  timeout 60 bash -c "until curl -sf -o /dev/null http://localhost:5173/openfn-3-poc/; do sleep 1; done"
 fi
 
-$SETUP_ONLY && { step "Set up. Lightning: http://localhost:4000  Replica: http://localhost:5173/openfn-ia-demo/"; exit 0; }
+$SETUP_ONLY && { step "Set up. Lightning: http://localhost:4000  Replica: http://localhost:5173/openfn-3-poc/"; exit 0; }
 
 # 6. Specs.
 run() {

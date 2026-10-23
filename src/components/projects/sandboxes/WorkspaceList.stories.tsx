@@ -4,7 +4,7 @@ import { findSandboxRow, sandboxRowsUnder } from "../../../mock-data/sandboxes";
 import { projects } from "../../../mock-data/projects";
 import { withRouter } from "../../../stories/decorators";
 
-const root = findSandboxRow(projects[0].id)!;
+const root = findSandboxRow(projects[0]!.id)!;
 
 const meta: Meta<typeof WorkspaceList> = {
   title: "Projects/Sandboxes/WorkspaceList",

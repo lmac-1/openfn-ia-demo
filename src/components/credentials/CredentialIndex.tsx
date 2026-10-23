@@ -19,7 +19,7 @@ import { useCurrentUser } from "../../session/session";
 
 interface Props {
   /** Project scope (project settings › Credentials). Omit for the user's /credentials page. */
-  project?: Project;
+  project?: Project | undefined;
   /** The user's own (on /credentials) or the project's credentials and clients. */
   credentials: Credential[];
   oauthClients: OauthClient[];

@@ -7,7 +7,7 @@ const meta: Meta<typeof CollectionsPanel> = {
   title: "Project settings/CollectionsPanel",
   component: CollectionsPanel,
   decorators: [withRouter],
-  args: { projectId: collections[0].projectId, initialCollections: collections, canCreateCollection: true },
+  args: { projectId: collections[0]!.projectId, initialCollections: collections, canCreateCollection: true },
 };
 export default meta;
 type Story = StoryObj<typeof CollectionsPanel>;

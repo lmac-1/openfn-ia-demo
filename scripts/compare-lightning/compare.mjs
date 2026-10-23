@@ -21,7 +21,7 @@
 //   --spec FILE        JSON list of shots (format below). Required.
 //   --out DIR          default ./compare-out
 //   --lightning URL    default http://localhost:4000
-//   --replica URL      default http://localhost:5173/openfn-ia-demo/#  (HashRouter)
+//   --replica URL      default http://localhost:5173/openfn-3-poc/#  (HashRouter)
 //   --email EMAIL      Lightning login, default demo@openfn.org
 //   --password PASS    default welcome12345 (the demo seed's password)
 //   --var KEY=VALUE    replaces {{KEY}} anywhere in the spec; repeatable
@@ -64,7 +64,7 @@ import path from "node:path";
 const opts = {
   out: "compare-out",
   lightning: "http://localhost:4000",
-  replica: "http://localhost:5173/openfn-ia-demo/#",
+  replica: "http://localhost:5173/openfn-3-poc/#",
   email: "demo@openfn.org",
   password: "welcome12345",
   width: 1440,

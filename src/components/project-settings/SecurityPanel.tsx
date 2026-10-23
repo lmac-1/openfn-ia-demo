@@ -11,7 +11,7 @@ interface Props {
   canEditProject: boolean;
   canRequireMfa: boolean;
   /** Set for a sandbox: MFA is inherited from the parent and read-only. */
-  parentProject?: Project;
+  parentProject?: Project | undefined;
 }
 
 /** The Security tab (`#security`, settings.html.heex:681-756): the "Require MFA?" switch. */

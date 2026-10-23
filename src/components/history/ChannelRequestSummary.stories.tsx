@@ -14,7 +14,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const argsFor = (i: number) => {
-  const request = channelRequests[i];
+  const request = channelRequests[i]!;
   return { request, event: primaryEvent(request), channel: findChannel(request.channelId)! };
 };
 

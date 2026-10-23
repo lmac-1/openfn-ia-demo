@@ -5,8 +5,10 @@ import Modal from "../Modal";
 interface Props {
   open?: boolean;
   onClose: () => void;
-  /** Called with the typed email when "Delete account" is pressed. */
-  onDelete?: (email: string) => void;
+  /** Called with the typed email when "Delete account" is pressed. May be async: the modal shows pending and stays open with the error if it rejects. */
+  onDelete?: (email: string) => void | Promise<void>;
+  /** The account's email. When given, "Delete account" enables only once it has been typed back. */
+  email?: string | undefined;
   /** "Your account…" (profile page) instead of "This user's account…" (admin). */
   isCurrentUser?: boolean;
   /** The user still has auditable activity in projects: shows the extra note. */
@@ -24,6 +26,7 @@ export default function UserDeletionModal({
   open = true,
   onClose,
   onDelete,
+  email,
   isCurrentUser = false,
   hasActivityInProjects = false,
   blocked = false,
@@ -63,7 +66,13 @@ export default function UserDeletionModal({
       confirmLabel="Delete account"
       tone="danger"
       formId="scheduled_deletion_form"
-      confirmation={{ id: "scheduled_deletion_email", label: "User email" }}
+      confirmation={{
+        id: "scheduled_deletion_email",
+        label: "User email",
+        ...(email !== undefined && { expected: email }),
+        mismatchError: isCurrentUser ? "This email doesn't match your current email" : "This email doesn't match the user's email",
+        disabledTooltip: isCurrentUser ? "Type your email to confirm" : "Type the user's email to confirm",
+      }}
     >
       <p>
         {isCurrentUser ? "Your" : "This user's"} account and credential data will be deleted. Please make sure none of
@@ -73,6 +82,11 @@ export default function UserDeletionModal({
         <p>
           *Note that {isCurrentUser ? "you still have" : "this user still has"} activity related to active projects. We
           may not be able to delete them entirely from the app until those projects are deleted.
+        </p>
+      )}
+      {email !== undefined && (
+        <p>
+          To confirm, type <strong className="font-medium text-gray-900">{email}</strong> below.
         </p>
       )}
     </ConfirmModal>

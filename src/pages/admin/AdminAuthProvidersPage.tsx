@@ -1,31 +1,31 @@
-import { Navigate, useLocation } from "react-router-dom";
 import Header from "../../components/Header";
 import { Centered, PageContent } from "../../components/PageContent";
 import AuthProviderForm from "../../components/admin/AuthProviderForm";
-import { useToast } from "../../components/Toast";
-import { authProvider, emptyAuthProvider } from "../../mock-data/admin";
+import type { AuthProvider, AuthProviderValues } from "../../types/admin";
+
+/** The contract between this page and whatever feeds it (the replica wrapper, later Lightning). */
+export interface AdminAuthProvidersPageProps {
+  /** The configured provider, or a blank one (id null) on /new. */
+  provider: AuthProvider;
+  /** Creates or updates the provider. Resolves when the host has it (it flashes, and after a create shows the edit route); rejects with field errors. */
+  onSave: (values: AuthProviderValues) => Promise<void>;
+  /** Fetches the discovery document with these values. Resolves on success; rejects with why not. */
+  onTest: (values: AuthProviderValues) => Promise<void>;
+  /** Removes the provider. Resolves when the host has (it then shows the blank form). */
+  onRemove: () => Promise<void>;
+}
 
 /**
- * Inventory view `admin-auth-providers` (AuthProvidersLive.Index):
- * /settings/authentication edits the configured provider (or redirects to
- * /new when there is none); /settings/authentication/new is a blank form.
+ * Inventory view `admin-auth-providers` (AuthProvidersLive.Index): the
+ * OpenID Connect provider form, blank on /settings/authentication/new.
+ * Props only, so it can run unchanged in Lightning; the replica's fixture,
+ * redirect and toasts live in AdminAuthProvidersPage.replica.tsx.
  */
-export default function AdminAuthProvidersPage() {
-  const { pathname } = useLocation();
-  const isNew = pathname.endsWith("/new");
-  const toast = useToast();
-  if (!isNew && !authProvider) return <Navigate to="/settings/authentication/new" replace />;
-  const provider = isNew || !authProvider ? emptyAuthProvider : authProvider;
-
+export default function AdminAuthProvidersPage({ provider, onSave, onTest, onRemove }: AdminAuthProvidersPageProps) {
   return (
     <PageContent header={<Header title="Authentication" />}>
       <Centered>
-        <AuthProviderForm
-          key={provider.id ?? "new"}
-          provider={provider}
-          onSave={() => toast(provider.id ? "Authentication Provider updated." : "Authentication Provider created.")}
-          onRemove={() => toast("Authentication Provider removed")}
-        />
+        <AuthProviderForm key={provider.id ?? "new"} provider={provider} onSave={onSave} onTest={onTest} onRemove={onRemove} />
       </Centered>
     </PageContent>
   );

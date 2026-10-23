@@ -29,7 +29,7 @@ export function useEditorRuns(graph: WorkflowGraph, runId: string | null) {
       const steps: RunOverlay["steps"] = {};
       for (const s of selectedSteps) {
         steps[s.jobId] = {
-          state: s.exitReason ? EXIT_STATE[s.exitReason] : "running",
+          state: s.exitReason ? (EXIT_STATE[s.exitReason as keyof typeof EXIT_STATE] ?? "crash") : "running",
           duration: s.finishedAt ? formatDuration(s.startedAt, s.finishedAt) : undefined,
         };
       }

@@ -5,7 +5,7 @@ import { collections } from "../../mock-data/project-settings";
 const meta: Meta<typeof CollectionDeleteModal> = {
   title: "Project settings/CollectionDeleteModal",
   component: CollectionDeleteModal,
-  args: { collection: collections[0], onCancel: () => {}, onDelete: () => {} },
+  args: { collection: collections[0]!, onCancel: () => {}, onDelete: () => {} },
 };
 export default meta;
 type Story = StoryObj<typeof CollectionDeleteModal>;

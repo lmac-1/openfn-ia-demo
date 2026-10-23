@@ -1,11 +1,12 @@
 import { HEALTH_RANGES } from "../../../constants";
 import type { HealthRange } from "../../../types/workflow-health";
-import Tabs from "../../Tabs";
+import SegmentedControl from "../../SegmentedControl";
 
 /**
- * The health page's time range (assets/js/health/RangePicker.tsx): a gray
- * segmented group; ranges longer than the project's history retention are
- * disabled with a tooltip.
+ * The health page's time range (assets/js/health/RangePicker.tsx): a radio
+ * group, not tabs, since it picks a value rather than swapping panels. A
+ * range longer than the project keeps history is disabled, and hovering it
+ * names the retention.
  */
 export default function RangePicker({
   days,
@@ -17,13 +18,12 @@ export default function RangePicker({
   retentionDays?: number | null;
 }) {
   return (
-    <Tabs<HealthRange["days"]>
-      variant="pill"
+    <SegmentedControl<HealthRange["days"]>
       label="Time range"
-      active={days}
+      value={days}
       onChange={onChange}
-      tabs={HEALTH_RANGES.map((range) => ({
-        id: range.days,
+      options={HEALTH_RANGES.map((range) => ({
+        value: range.days,
         label: range.label,
         disabled: retentionDays !== null && Number(range.days) > retentionDays,
         disabledReason: `Only ${retentionDays} days of history are kept for this project.`,

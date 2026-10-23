@@ -122,9 +122,7 @@ export default function WorkOrdersTable({
       }
       footer={
         <Pagination
-          pageNumber={1}
-          pageSize={pageSize}
-          totalEntries={workOrders.length}
+          page={{ number: 1, size: pageSize, totalEntries: workOrders.length }}
           actions={
             canRunWorkflow &&
             workOrders.length > 0 && (

@@ -9,7 +9,7 @@ interface Props {
   onClose: () => void;
   projectId: string;
   /** Set to edit an existing keychain credential. */
-  keychainCredential?: KeychainCredential;
+  keychainCredential?: KeychainCredential | undefined;
   /** The project's credentials, offered as the default. */
   credentials: Credential[];
   onSave?: (keychain: KeychainCredential) => void;

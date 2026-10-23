@@ -3,6 +3,7 @@
  * and the bundled icons. Pure: the catalogue and its versions are fixtures in
  * mock-data/adaptors.ts.
  */
+import { assetUrl } from "./assets";
 import { capitalize } from "./format";
 
 /** `@openfn/language-http@latest` → `{ package: "@openfn/language-http", version: "latest" }`. */
@@ -103,5 +104,5 @@ const ICONS = new Set([
 
 export function adaptorIconUrl(specifier: string): string | null {
   const short = adaptorShortName(specifier);
-  return ICONS.has(short) ? `${import.meta.env.BASE_URL}images/adaptors/${short}-square.png` : null;
+  return ICONS.has(short) ? assetUrl(`images/adaptors/${short}-square.png`) : null;
 }

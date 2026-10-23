@@ -8,7 +8,7 @@ interface Props {
   onRunWithCustomInputClick?: () => void;
   disabled?: boolean;
   isRunning?: boolean;
-  text?: string;
+  text?: string | undefined;
   variant?: "primary" | "secondary";
   /** Hover text (Lightning shows the shortcut, or why it's disabled). */
   tooltip?: string;

@@ -10,12 +10,12 @@ export const zeroPersistenceMessage =
 export const clonedStepMessage =
   "This step was originally executed in a previous run. It was skipped in this run; the original output has been used as the starting point for downstream jobs.";
 
-/** A step that ran in an earlier run and was reused by this one. */
-export function isClonedStep(step: Step, run: Run): boolean {
-  return step.startedAt < run.insertedAt;
+/** A step that ran in an earlier run and was reused by this one (its row is older than the run's). */
+export function isClonedStep(step: Pick<Step, "startedAt" | "insertedAt">, run: Pick<Run, "insertedAt">): boolean {
+  return (step.insertedAt ?? step.startedAt) < run.insertedAt;
 }
 
 /** The workflow editor, open on this run with the step's job selected ("Inspect this step"). */
-export function inspectStepPath(projectId: string, workflowId: string, run: Run, step: Step): string {
+export function inspectStepPath(projectId: string, workflowId: string, run: Pick<Run, "id">, step: Pick<Step, "jobId">): string {
   return `/projects/${projectId}/w/${workflowId}?run=${run.id}&panel=editor&job=${step.jobId}`;
 }

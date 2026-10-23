@@ -1,5 +1,5 @@
 import type { ButtonHTMLAttributes, MouseEventHandler, ReactNode, Ref } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "../routing/router";
 import { cn } from "../utils/cn";
 
 export type IconButtonSize = "sm" | "md" | "lg";
@@ -9,7 +9,7 @@ interface Props extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children"
   icon: string | ReactNode;
   /** Accessible name, also shown as the hover tooltip. */
   label: string;
-  size?: IconButtonSize;
+  size?: IconButtonSize | undefined;
   /** Highlights the button, e.g. a toggled panel. */
   active?: boolean;
   /** `danger` for destructive actions, e.g. a delete icon in a table row. */

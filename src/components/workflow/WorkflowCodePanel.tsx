@@ -39,7 +39,7 @@ export default function WorkflowCodePanel({ graph, onClose }: { graph: WorkflowG
       }
     >
       <div className="h-100 overflow-hidden rounded-md">
-        <CodeEditor value={yaml} readOnly ariaLabel="Workflow YAML code" />
+        <CodeEditor value={yaml} language="yaml" readOnly ariaLabel="Workflow YAML code" />
       </div>
     </InspectorLayout>
   );

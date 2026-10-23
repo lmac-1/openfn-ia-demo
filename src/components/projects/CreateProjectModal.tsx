@@ -1,13 +1,15 @@
-import { useState } from "react";
 import FormModal from "../FormModal";
 import { TextArea } from "../Inputs";
 import NameField from "../NameField";
 import { urlSafeName } from "../../utils/format";
+import { useForm } from "../../utils/useForm";
+import { blank } from "../../utils/validate";
 
 /**
  * "Create a new project" (DashboardLive.ProjectCreationModal): Name, with
- * the URL-safe name it will get, and an optional Description. Create is
- * disabled until the name is valid. No backend: submitting just closes.
+ * the URL-safe name it will get, and an optional Description. Create with
+ * an invalid name shows its error instead of submitting. Server field errors
+ * (keyed `rawName`, `description`) show on their fields.
  */
 export default function CreateProjectModal({
   open,
@@ -16,17 +18,18 @@ export default function CreateProjectModal({
 }: {
   open: boolean;
   onClose: () => void;
-  onCreate?: (project: { name: string; description: string }) => void;
+  onCreate?: (project: { name: string; description: string }) => Promise<void>;
 }) {
-  const [rawName, setRawName] = useState("");
-  const [description, setDescription] = useState("");
-  const name = urlSafeName(rawName);
-  const tooLong = description.length > 240;
-  const valid = name !== "" && !tooLong;
+  const form = useForm({
+    initial: { rawName: "", description: "" },
+    validate: ({ rawName, description }) => ({
+      rawName: blank(urlSafeName(rawName)),
+      description: description.length > 240 ? ["should be at most 240 character(s)"] : [],
+    }),
+  });
 
   const close = () => {
-    setRawName("");
-    setDescription("");
+    form.reset();
     onClose();
   };
 
@@ -37,30 +40,21 @@ export default function CreateProjectModal({
       title="Create a new project"
       size="md"
       formId="project-form"
-      onSubmit={() => {
-        onCreate?.({ name, description });
+      onSubmit={form.modalSubmit(async ({ rawName, description }) => {
+        await onCreate?.({ name: urlSafeName(rawName), description });
         close();
-      }}
+      })}
       submitLabel="Create project"
-      submitDisabled={!valid}
       cancelId="cancel-project-creation"
     >
       <NameField
         id="project_raw_name"
         required
-        value={rawName}
-        onChange={(raw) => setRawName(raw)}
-        errors={rawName !== "" && name === "" ? ["can't be blank"] : []}
+        {...form.fieldProps("rawName")}
         badgeLabel="Your project will be named"
       />
       <div className="space-y-2">
-        <TextArea
-          id="project_description"
-          label="Description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          errors={tooLong ? ["should be at most 240 character(s)"] : []}
-        />
+        <TextArea id="project_description" label="Description" {...form.fieldProps("description")} />
         <p className="text-xs text-gray-600">
           A short description of a project [max 240 characters]
         </p>

@@ -10,7 +10,19 @@ import { useCopy } from "../../utils/useCopy";
  * The recovery codes card (backup_codes_live/index.html.heex): the codes
  * (used ones struck through), Print and Copy, and "Generate new backup codes".
  */
-export default function BackupCodesCard({ codes, onRegenerate }: { codes: BackupCode[]; onRegenerate?: () => void }) {
+export default function BackupCodesCard({
+  codes,
+  onRegenerate,
+  regenerating = false,
+  onPrint,
+}: {
+  codes: BackupCode[];
+  onRegenerate?: () => void;
+  /** Shows the regenerate button pending. */
+  regenerating?: boolean;
+  /** Opens the printable copy. */
+  onPrint?: () => void;
+}) {
   const { copied, copy } = useCopy(codes.map((c) => c.code).join("\n\n"));
   return (
     <Card padding="none" className="divide-y divide-gray-300">
@@ -24,20 +36,22 @@ export default function BackupCodesCard({ codes, onRegenerate }: { codes: Backup
         Keep your recovery codes in a safe spot. These codes are the last resort for accessing your account in case
         you lose your authenticator device.
       </Alert>
-      <div className="grid gap-4 p-6 text-center tracking-widest md:grid-cols-2">
-        {codes.map((c) =>
-          c.usedAt ? (
-            <span key={c.code} className="text-sm text-gray-300">
-              <span className="line-through">{c.code}</span>
-              <InfoTooltip title={`Code used on ${c.usedAt.slice(0, 19).replace("T", " ")}`} />
-            </span>
-          ) : (
-            <span key={c.code}>{c.code}</span>
-          )
-        )}
+      <div className="grid gap-4 p-6 md:grid-cols-2">
+        {codes.map((c) => (
+          <div key={c.code} className="text-center tracking-widest">
+            {c.usedAt ? (
+              <span className="text-sm text-gray-300">
+                <span className="line-through">{c.code}</span>
+                <InfoTooltip title={`Code used on ${c.usedAt.slice(0, 19).replace("T", " ")}`} />
+              </span>
+            ) : (
+              c.code
+            )}
+          </div>
+        ))}
       </div>
       <div className="flex items-center justify-center gap-4 p-6">
-        <Button theme="secondary" size="lg" onClick={() => window.print()}>
+        <Button theme="secondary" size="lg" onClick={onPrint}>
           <span className="hero-printer h-5 w-5" />
           Print Codes
         </Button>
@@ -56,7 +70,7 @@ export default function BackupCodesCard({ codes, onRegenerate }: { codes: Backup
           title="Generate new backup codes"
           subtitle="When you generate new backup codes, you must copy or print the new codes. Your old codes won't work anymore."
           action={
-            <Button theme="secondary" size="lg" onClick={onRegenerate}>
+            <Button theme="secondary" size="lg" onClick={onRegenerate} pending={regenerating}>
               Generate new backup codes
             </Button>
           }

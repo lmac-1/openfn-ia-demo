@@ -12,7 +12,7 @@ export default function RunBadge({
   className,
 }: {
   runId: string;
-  onClose?: () => void;
+  onClose?: (() => void) | undefined;
   variant?: "default" | "warning";
   className?: string;
 }) {

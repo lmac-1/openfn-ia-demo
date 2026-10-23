@@ -1,5 +1,5 @@
 import type { MouseEventHandler } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "../routing/router";
 import { cn } from "../utils/cn";
 import { shortUuid } from "../utils/format";
 
@@ -21,7 +21,7 @@ export default function UuidChip({
   length?: number;
   to?: string;
   disabled?: boolean;
-  tooltip?: string;
+  tooltip?: string | undefined;
   onClick?: MouseEventHandler<HTMLAnchorElement>;
 }) {
   const short = shortUuid(uuid, length);

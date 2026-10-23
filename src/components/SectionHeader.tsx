@@ -7,7 +7,7 @@ interface Props {
   /** Right-aligned action, usually a Button. */
   action?: ReactNode;
   /** When set, shows "Role based permissions: You cannot modify this project's {section}". */
-  permissionsSection?: string;
+  permissionsSection?: string | undefined;
 }
 
 /**

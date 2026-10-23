@@ -22,7 +22,7 @@ export default function MetricCard({
       <Heading as="h2" size="eyebrow" className="truncate">
         {title}
       </Heading>
-      <div className="mt-2 text-3xl font-bold">{value}</div>
+      <div className="mt-2 text-3xl font-bold">{value}</div>{" "}
       {(suffix || link) && (
         <div className="mt-1 flex items-baseline justify-between gap-2 text-xs text-gray-500">
           <div>{suffix}</div>

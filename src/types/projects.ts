@@ -11,6 +11,19 @@ export interface ProjectMember {
   digest: "never" | "daily" | "weekly" | "monthly";
 }
 
+/**
+ * The project a page is in: enough to build its links and draw it in the
+ * crumbs and the project picker. Part of the page contract hosts send,
+ * written out rather than picked from the sample-data `Project`.
+ */
+export interface CurrentProject {
+  id: string;
+  /** Sandboxes point at their parent project. */
+  parentId: string | null;
+  /** Hex colour used for sandbox accents in the picker and banner. */
+  color: string | null;
+}
+
 export interface Project {
   id: string;
   name: string;

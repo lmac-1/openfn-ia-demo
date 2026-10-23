@@ -13,9 +13,9 @@ type Story = StoryObj<typeof meta>;
 
 const base = { projectId: "p", canEditDataRetention: true, runFinished: true, inputOrOutput: "input" as const };
 
-export const Input: Story = { args: { ...base, step: steps[0], dataclip: findDataclip("dc-7f3a91") } };
+export const Input: Story = { args: { ...base, step: steps[0]!, dataclip: findDataclip("dc-7f3a91") } };
 export const NoOutput: Story = {
-  args: { ...base, inputOrOutput: "output", step: { ...steps[3], finishedAt: null }, dataclip: undefined },
+  args: { ...base, inputOrOutput: "output", step: { ...steps[3]!, finishedAt: null }, dataclip: undefined },
 };
-export const Wiped: Story = { args: { ...base, step: steps[0], dataclip: findDataclip("dc-wiped") } };
+export const Wiped: Story = { args: { ...base, step: steps[0]!, dataclip: findDataclip("dc-wiped") } };
 export const Running: Story = { args: { ...base, runFinished: false, step: undefined, dataclip: undefined } };

@@ -8,7 +8,7 @@ const graph = findWorkflowGraph("wf-dhis2-sheets")!;
 
 function Demo({ initial, returnToConfigure }: { initial: AdaptorModal; returnToConfigure?: boolean }) {
   const [open, setOpen] = useState<AdaptorModal>(initial);
-  const [job, setJob] = useState(graph.jobs[0]);
+  const [job, setJob] = useState(graph.jobs[0]!);
   return (
     <div className="space-y-2 text-sm">
       <p>

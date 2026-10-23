@@ -7,7 +7,7 @@ const meta: Meta<typeof WorkflowsHeader> = {
   title: "Projects/WorkflowsHeader",
   component: WorkflowsHeader,
   decorators: [withRouter],
-  args: { count: 3, projectId: projects[0].id, searchTerm: "", onSearch: () => {} },
+  args: { count: 3, projectId: projects[0]!.id, searchTerm: "", onSearch: () => {} },
 };
 export default meta;
 type Story = StoryObj<typeof WorkflowsHeader>;

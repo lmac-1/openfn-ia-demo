@@ -78,7 +78,7 @@ export const users: User[] = [
  * through useCurrentUser() / useInstanceInfo(), never from here.
  */
 export const session: Session = {
-  user: users[0],
+  user: users[0]!,
   instance: {
     // Lightning.Config.instance_admin_email
     adminEmail: "support@openfn.org",

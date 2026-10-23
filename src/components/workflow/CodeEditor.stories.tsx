@@ -19,3 +19,12 @@ export const Editable: Story = { render: () => <EditableDemo /> };
 export const ReadOnly: Story = {
   args: { value: "get('trackedEntityInstances', {\n  ou: 'DiszpKrYNg8',\n});\n", readOnly: true },
 };
+export const Json: Story = {
+  args: { value: '{\n  "data": {\n    "resourceType": "Patient"\n  }\n}\n', language: "json", readOnly: true },
+};
+export const Minimap: Story = {
+  args: {
+    value: Array.from({ length: 40 }, (_, i) => `fn(state => {\n  // step ${i + 1}\n  return state;\n});`).join("\n"),
+    options: { minimap: { enabled: true } },
+  },
+};

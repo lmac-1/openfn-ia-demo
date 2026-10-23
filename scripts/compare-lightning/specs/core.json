@@ -2,6 +2,7 @@
   { "name": "projects", "path": "/projects" },
   { "name": "projects-create", "path": "/projects", "steps": [{ "click": "text=Create project" }] },
   { "name": "user-menu", "path": "/projects", "steps": [{ "click": "text=Amy Admin" }] },
+  { "name": "mfa-required", "path": "/mfa_required" },
 
   { "name": "workflows", "path": "/projects/{{P}}/w" },
   { "name": "project-picker", "path": "/projects/{{P}}/w", "steps": [{ "click": "button:has-text('openhie-project')", "sleep": 1000 }] },

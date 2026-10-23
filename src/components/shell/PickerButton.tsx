@@ -31,6 +31,7 @@ export default function PickerButton({
   const visible = truncated ? parts.slice(-2) : parts;
 
   return (
+    // eslint-disable-next-line no-restricted-syntax -- debt: a secondary Button that takes the sandbox colour at runtime
     <button
       type="button"
       onClick={(e) => {

@@ -1,21 +1,32 @@
 import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useRouter } from "../../routing/router";
 import { cn } from "../../utils/cn";
-import { useCurrentUser, useInstanceInfo } from "../../session/session";
 import type { Project } from "../../types/projects";
+import type { User } from "../../types/users";
 import NavItem from "./NavItem";
-import UserMenu from "./UserMenu";
+import UserMenu, { type MenuUser } from "./UserMenu";
 import { OpenFnLogo, OpenFnLogoCollapsed } from "./OpenFnLogo";
 
 /** Which menu the side bar shows: the project's, your own pages, or the admin menu. */
 export type SidebarVariant = "project" | "profile" | "admin";
 
-interface Props {
+/** The colour scheme, Lightning's `side_menu_theme`: the project menu is primary, the admin menu slate. */
+export type SidebarTheme = "primary-theme" | "sudo-variant";
+
+export interface SidebarProps {
   variant: SidebarVariant;
   /** Required for the project variant. */
-  project?: Project;
+  project?: Pick<Project, "id"> | undefined;
+  user: MenuUser;
   /** Superusers get the Admin menu in place of the support links. */
   canAccessAdmin: boolean;
+  /** Whether the instance exposes the live dashboard ("Sys Info"). */
+  sysInfo?: boolean;
+  /** Address the "Support" link mails. */
+  adminEmail: string;
+  /** Release label under the logo. */
+  releaseLabel: string;
+  theme?: SidebarTheme;
   collapsed: boolean;
   onToggle: () => void;
 }
@@ -24,10 +35,9 @@ function isAt(pathname: string, path: string) {
   return pathname === path || pathname.startsWith(path + "/");
 }
 
-function ProjectItems({ project }: { project: Project }) {
-  const { pathname } = useLocation();
+function ProjectItems({ project, user }: { project: Pick<Project, "id">; user: Pick<User, "experimentalFeatures"> }) {
+  const { pathname } = useRouter().useLocation();
   const base = `/projects/${project.id}`;
-  const user = useCurrentUser();
   return (
     <>
       <NavItem to={`${base}/w`} icon="hero-square-3-stack-3d" label="Workflows" active={isAt(pathname, `${base}/w`)} />
@@ -52,11 +62,16 @@ function ProjectItems({ project }: { project: Project }) {
 }
 
 function ProfileItems() {
-  const { pathname } = useLocation();
+  const { pathname } = useRouter().useLocation();
   return (
     <>
       <NavItem to="/projects" icon="hero-folder" label="Projects" active={pathname === "/projects"} />
-      <NavItem to="/profile" icon="hero-user-circle" label="User Profile" active={pathname === "/profile"} />
+      <NavItem
+        to="/profile"
+        icon="hero-user-circle"
+        label="User Profile"
+        active={isAt(pathname, "/profile") && !isAt(pathname, "/profile/tokens")}
+      />
       <NavItem to="/credentials" icon="hero-key" label="Credentials" active={isAt(pathname, "/credentials")} />
       <NavItem to="/profile/tokens" icon="hero-command-line" label="API Tokens" active={isAt(pathname, "/profile/tokens")} />
     </>
@@ -64,7 +79,7 @@ function ProfileItems() {
 }
 
 function AdminItems() {
-  const { pathname } = useLocation();
+  const { pathname } = useRouter().useLocation();
   return (
     <>
       <div className="mt-4" />
@@ -96,13 +111,12 @@ function AdminItems() {
 }
 
 /** Support links for regular users; superusers get the Admin menu instead. */
-function FooterItems({ canAccessAdmin }: { canAccessAdmin: boolean }) {
-  const { adminEmail } = useInstanceInfo();
+function FooterItems({ canAccessAdmin, sysInfo, adminEmail }: { canAccessAdmin: boolean; sysInfo: boolean; adminEmail: string }) {
   if (canAccessAdmin) {
     return (
       <>
         <NavItem to="/settings/projects" icon="hero-cog-6-tooth" label="Admin Menu" />
-        <NavItem to="/dashboard" icon="hero-exclamation-triangle" label="Sys Info" />
+        {sysInfo && <NavItem to="/dashboard" icon="hero-exclamation-triangle" label="Sys Info" />}
       </>
     );
   }
@@ -122,11 +136,11 @@ function FooterItems({ canAccessAdmin }: { canAccessAdmin: boolean }) {
 }
 
 /** The OpenFn logo and release version at the foot of the side menu. */
-export function SidebarLogo({ collapsed = false }: { collapsed?: boolean }) {
-  const { releaseLabel } = useInstanceInfo();
+export function SidebarLogo({ releaseLabel, collapsed = false }: { releaseLabel: string; collapsed?: boolean }) {
   return (
     <div className="primary-light mt-3 border-t border-white/10 pt-5 text-center">
       {collapsed ? <OpenFnLogoCollapsed className="mx-auto h-6" /> : <OpenFnLogo className="mx-auto h-6" />}
+      {/* eslint-disable-next-line no-restricted-syntax -- below text-xs, the smallest step on the scale */}
       <code className="block py-1 text-[8px] opacity-50">{releaseLabel}</code>
     </div>
   );
@@ -136,10 +150,21 @@ export function SidebarLogo({ collapsed = false }: { collapsed?: boolean }) {
  * Lightning's side menu (layouts/live.html.heex and settings.html.heex): the
  * user menu in a dark h-20 bar, the menu items for where you are, support or
  * admin links pinned low, then the OpenFn logo, version and collapse toggle.
- * Ctrl+M collapses it, as in Lightning.
+ * Ctrl+M collapses it. Props only: the host says who is signed in and where
+ * we are.
  */
-export default function Sidebar({ variant, project, canAccessAdmin, collapsed, onToggle }: Props) {
-  const user = useCurrentUser();
+export default function Sidebar({
+  variant,
+  project,
+  user,
+  canAccessAdmin,
+  sysInfo = true,
+  adminEmail,
+  releaseLabel,
+  theme = "primary-theme",
+  collapsed,
+  onToggle,
+}: SidebarProps) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.key.toLowerCase() === "m") {
@@ -159,20 +184,20 @@ export default function Sidebar({ variant, project, canAccessAdmin, collapsed, o
         id="sidebar-panel"
         data-ui="sidebar"
         data-collapsed={String(collapsed)}
-        className={cn("fixed z-[100] flex h-full flex-col transition-all duration-200", variant === "admin" && "sudo-variant")}
+        className="fixed z-100 flex h-full flex-col transition-all duration-200"
       >
-        <div className="app-logo-container flex h-20 items-center">
+        <div className={cn("app-logo-container flex h-20 items-center", theme)}>
           <UserMenu user={user} />
         </div>
-        <nav id="side-menu" className="flex min-h-0 flex-1 flex-col">
+        <nav id="side-menu" className={cn("flex min-h-0 flex-1 flex-col", theme)}>
           <div className={cn("flex min-h-0 flex-1 flex-col overflow-y-auto", variant !== "admin" && "py-4")}>
             {variant === "admin" ? (
               <AdminItems />
             ) : (
               <>
-                {variant === "project" && project ? <ProjectItems project={project} /> : <ProfileItems />}
+                {variant === "project" && project ? <ProjectItems project={project} user={user} /> : <ProfileItems />}
                 <div className="grow" />
-                <FooterItems canAccessAdmin={canAccessAdmin} />
+                <FooterItems canAccessAdmin={canAccessAdmin} sysInfo={sysInfo} adminEmail={adminEmail} />
               </>
             )}
           </div>
@@ -187,7 +212,8 @@ export default function Sidebar({ variant, project, canAccessAdmin, collapsed, o
               </div>
             </div>
           )}
-          <SidebarLogo collapsed={collapsed} />
+          <SidebarLogo releaseLabel={releaseLabel} collapsed={collapsed} />
+          {/* eslint-disable-next-line no-restricted-syntax -- sidebar chrome, styled by the themes through .sidebar-toggle-btn */}
           <button
             type="button"
             onClick={onToggle}

@@ -16,7 +16,7 @@ interface Props {
   initialAuthMethods: WebhookAuthMethod[];
   canWrite: boolean;
   /** Set for a sandbox: methods are managed in the parent. */
-  parentProject?: Project;
+  parentProject?: Project | undefined;
 }
 
 type Modal =

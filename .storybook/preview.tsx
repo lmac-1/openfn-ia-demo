@@ -1,5 +1,6 @@
 import type { Preview, Decorator } from "@storybook/react";
 import "../src/index.css";
+import "../src/monacoSetup";
 import { DEFAULT_THEME_ID, THEMES } from "../src/theme/themes";
 import SessionProvider from "../src/session/SessionProvider";
 import { session } from "../src/mock-data/users";

@@ -1,4 +1,5 @@
 import { formatNumber } from "../../../utils/format";
+import { historyUrl, stateUrl } from "../../../utils/history";
 import type { ErrorSignature, FailureState } from "../../../types/workflow-health";
 import Button from "../../Button";
 import Card from "../../Card";
@@ -43,6 +44,19 @@ const OUTCOMES: Partial<Record<string, FailureState>> = {
   rejected: "rejected",
 };
 
+// A rejected work order has no run for the signature filter to match, so its
+// row uses History's `rejected` flag. Other rows set no status filter: the
+// signature filter already keeps to failed work orders (TriageTable.tsx).
+function signatureUrl(projectId: string, workflowId: string, from: string, s: ErrorSignature) {
+  if (s.exit_reason === "rejected") return stateUrl(projectId, workflowId, from, "rejected");
+  return historyUrl(projectId, workflowId, {
+    date_after: from,
+    error_signature_exit_reason: s.exit_reason,
+    error_signature_error_type: s.error_type,
+    error_signature_job_id: s.job_id,
+  });
+}
+
 const errorTypeOf = ({ error_type }: ErrorSignature) => error_type || "unknown";
 
 function Signature({ signature }: { signature: ErrorSignature }) {
@@ -66,16 +80,22 @@ function Signature({ signature }: { signature: ErrorSignature }) {
 /**
  * "Triage - grouped by failure type": failed work orders grouped by error
  * signature, largest first, each with a suggestion and a link to History
- * (TriageTable.tsx). With no failures it's a card with the empty message.
+ * (TriageTable.tsx). With no failures it's a card with the
+ * empty message.
  */
 export default function TriageTable({
   signatures,
   emptyMessage,
-  historyHref,
+  projectId,
+  workflowId,
+  from,
 }: {
   signatures: ErrorSignature[];
   emptyMessage: string;
-  historyHref: string;
+  projectId: string;
+  workflowId: string;
+  /** The reply's `window.from`: where every row's History link starts. */
+  from: string;
 }) {
   if (signatures.length === 0) {
     return (
@@ -104,10 +124,10 @@ export default function TriageTable({
             <Td>
               <Signature signature={s} />
             </Td>
-            <Td>{(s.error_type && TIPS[s.error_type]) || TIPS.default}</Td>
+            <Td>{(s.error_type && TIPS[s.error_type]) || TIPS["default"]}</Td>
             <Td actions>
               {s.exit_reason && (
-                <Button theme="secondary" to={historyHref} className="whitespace-nowrap">
+                <Button theme="secondary" to={signatureUrl(projectId, workflowId, from, s)} className="whitespace-nowrap">
                   View history
                 </Button>
               )}
